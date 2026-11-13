@@ -337,7 +337,10 @@ class Program
         using var paintSub = new SKPaint { Color = new SKColor(0x94, 0xA3, 0xB8), IsAntialias = true };
         canvas.DrawText("Dastavez Studio", 160, 102, SKTextAlign.Left, fontSub, paintSub);
 
-        using var fontTagline = new SKFont(SKTypeface.FromFamilyName("Segoe UI", SKFontStyle.Bold), 17);
+        var typefaceTagline = SKTypeface.FromFamilyName("Nirmala UI", SKFontStyle.Bold) 
+                              ?? SKTypeface.FromFamilyName("Mangal", SKFontStyle.Bold) 
+                              ?? SKTypeface.Default;
+        using var fontTagline = new SKFont(typefaceTagline, 17);
         using var paintTagline = new SKPaint { Color = new SKColor(0x38, 0xBD, 0xF8), IsAntialias = true };
         canvas.DrawText("हर दस्तावेज़, तैयार! — 100% Offline", 160, 134, SKTextAlign.Left, fontTagline, paintTagline);
 
