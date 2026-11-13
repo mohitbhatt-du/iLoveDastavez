@@ -1,0 +1,15 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/DastavezStudio.AiEngine/DastavezStudio.AiEngine.csproj" />
+    <Project Path="src/DastavezStudio.App/DastavezStudio.App.csproj" />
+    <Project Path="src/DastavezStudio.Core/DastavezStudio.Core.csproj" />
+    <Project Path="src/DastavezStudio.ExamPresets/DastavezStudio.ExamPresets.csproj" />
+    <Project Path="src/DastavezStudio.ImageEngine/DastavezStudio.ImageEngine.csproj" />
+    <Project Path="src/DastavezStudio.OcrEngine/DastavezStudio.OcrEngine.csproj" />
+    <Project Path="src/DastavezStudio.PdfEngine/DastavezStudio.PdfEngine.csproj" />
+    <Project Path="src/DastavezStudio.Security/DastavezStudio.Security.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/DastavezStudio.UnitTests/DastavezStudio.UnitTests.csproj" />
+  </Folder>
+</Solution>

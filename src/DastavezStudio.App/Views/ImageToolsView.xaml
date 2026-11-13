@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Page
+    x:Class="DastavezStudio.App.Views.ImageToolsView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="using:DastavezStudio.App.Views"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Spacing="20" Padding="32,24,32,32" MaxWidth="1100" HorizontalAlignment="Left">
+            
+            <StackPanel Spacing="4">
+                <TextBlock Text="Image Toolkit" Style="{StaticResource TitleTextBlockStyle}" FontWeight="Bold" />
+                <TextBlock Text="Precision pixel resizing, iterative target KB compression, DPI formatting, and metadata privacy scrubbing." 
+                           Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+            </StackPanel>
+
+            <!-- Configuration Grid -->
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="20">
+                <!-- Dimensions & Resizing -->
+                <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                        BorderThickness="1"
+                        CornerRadius="8"
+                        Padding="20">
+                    <StackPanel Spacing="16">
+                        <TextBlock Text="Dimension Controls" Style="{StaticResource SubtitleTextBlockStyle}" FontWeight="SemiBold" />
+                        
+                        <StackPanel Orientation="Horizontal" Spacing="16">
+                            <StackPanel Spacing="6" Width="140">
+                                <TextBlock Text="Width (px)" Style="{StaticResource CaptionTextBlockStyle}" />
+                                <NumberBox Value="{x:Bind ViewModel.TargetWidth, Mode=TwoWay}" SpinButtonPlacementMode="Inline" />
+                            </StackPanel>
+                            <StackPanel Spacing="6" Width="140">
+                                <TextBlock Text="Height (px)" Style="{StaticResource CaptionTextBlockStyle}" />
+                                <NumberBox Value="{x:Bind ViewModel.TargetHeight, Mode=TwoWay}" SpinButtonPlacementMode="Inline" />
+                            </StackPanel>
+                        </StackPanel>
+
+                        <CheckBox Content="Preserve Aspect Ratio" IsChecked="{x:Bind ViewModel.MaintainAspectRatio, Mode=TwoWay}" />
+                        
+                        <StackPanel Spacing="6">
+                            <TextBlock Text="Target DPI" Style="{StaticResource CaptionTextBlockStyle}" />
+                            <NumberBox Value="{x:Bind ViewModel.TargetDpi, Mode=TwoWay}" SpinButtonPlacementMode="Inline" Minimum="72" Maximum="600" />
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+
+                <!-- Compression & Format -->
+                <Border Grid.Column="1"
+                        Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                        BorderThickness="1"
+                        CornerRadius="8"
+                        Padding="20">
+                    <StackPanel Spacing="16">
+                        <TextBlock Text="Compression &amp; Format" Style="{StaticResource SubtitleTextBlockStyle}" FontWeight="SemiBold" />
+                        
+                        <StackPanel Spacing="6">
+                            <TextBlock Text="Target File Size Limit (KB)" Style="{StaticResource CaptionTextBlockStyle}" />
+                            <NumberBox Value="{x:Bind ViewModel.TargetSizeKb, Mode=TwoWay}" SpinButtonPlacementMode="Inline" Minimum="5" Maximum="5000" />
+                            <TextBlock Text="Iteratively encodes image to fit below this limit" 
+                                       Style="{StaticResource CaptionTextBlockStyle}" Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
+                        </StackPanel>
+
+                        <StackPanel Spacing="6">
+                            <TextBlock Text="Output Format" Style="{StaticResource CaptionTextBlockStyle}" />
+                            <ComboBox SelectedIndex="0" HorizontalAlignment="Stretch">
+                                <ComboBoxItem Content="JPEG / JPG (Recommended for Exam Portals)" />
+                                <ComboBoxItem Content="PNG (Lossless)" />
+                                <ComboBoxItem Content="WEBP (Modern Web)" />
+                            </ComboBox>
+                        </StackPanel>
+
+                        <CheckBox Content="Strip EXIF / Privacy Metadata" IsChecked="{x:Bind ViewModel.StripExif, Mode=TwoWay}" />
+                    </StackPanel>
+                </Border>
+            </Grid>
+
+            <!-- Actions Bar -->
+            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                    BorderThickness="1"
+                    CornerRadius="8"
+                    Padding="16">
+                <StackPanel Orientation="Horizontal" Spacing="12">
+                    <Button Content="Select Source Image" Style="{StaticResource AccentButtonStyle}" />
+                    <Button Content="Process &amp; Export" />
+                </StackPanel>
+            </Border>
+
+        </StackPanel>
+    </ScrollViewer>
+</Page>

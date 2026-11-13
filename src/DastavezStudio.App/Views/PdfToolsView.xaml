@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Page
+    x:Class="DastavezStudio.App.Views.PdfToolsView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="using:DastavezStudio.App.Views"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Spacing="20" Padding="32,24,32,32" MaxWidth="1100" HorizontalAlignment="Left">
+            
+            <StackPanel Spacing="4">
+                <TextBlock Text="PDF Toolkit" Style="{StaticResource TitleTextBlockStyle}" FontWeight="Bold" />
+                <TextBlock Text="Compress, merge, split, reorder, convert, and secure PDF documents completely offline." 
+                           Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+            </StackPanel>
+
+            <!-- Tool Selector Segmented Buttons -->
+            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                    BorderThickness="1"
+                    CornerRadius="8"
+                    Padding="16">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <Button Content="Compress PDF" Style="{StaticResource AccentButtonStyle}" />
+                    <Button Content="Merge PDFs" />
+                    <Button Content="Split PDF" />
+                    <Button Content="Extract Pages" />
+                    <Button Content="Rotate Pages" />
+                    <Button Content="Convert to Images" />
+                    <Button Content="Password Protect" />
+                </StackPanel>
+            </Border>
+
+            <!-- Active Operation Settings Card -->
+            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                    BorderThickness="1"
+                    CornerRadius="8"
+                    Padding="20">
+                <StackPanel Spacing="16">
+                    <TextBlock Text="Compression Settings" Style="{StaticResource SubtitleTextBlockStyle}" FontWeight="SemiBold" />
+                    
+                    <Grid ColumnDefinitions="*,*" ColumnSpacing="20">
+                        <StackPanel Spacing="8">
+                            <TextBlock Text="Target File Size (KB)" Style="{StaticResource BodyStrongTextBlockStyle}" />
+                            <NumberBox Value="{x:Bind ViewModel.TargetSizeKb, Mode=TwoWay}" SpinButtonPlacementMode="Inline" SmallChange="50" Minimum="10" Maximum="50000" />
+                            <TextBlock Text="Specify target size (e.g. 300 KB for UPSC / State PSC certificates)" 
+                                       Style="{StaticResource CaptionTextBlockStyle}" Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="1" Spacing="8">
+                            <TextBlock Text="Compression Profile" Style="{StaticResource BodyStrongTextBlockStyle}" />
+                            <ComboBox SelectedIndex="1" HorizontalAlignment="Stretch">
+                                <ComboBoxItem Content="Low (Preserve Maximum Quality)" />
+                                <ComboBoxItem Content="Balanced (Recommended for Exam Portals)" />
+                                <ComboBoxItem Content="High (Aggressive Size Reduction)" />
+                            </ComboBox>
+                        </StackPanel>
+                    </Grid>
+
+                    <StackPanel Orientation="Horizontal" Spacing="12" Margin="0,12,0,0">
+                        <Button Content="Select PDF File" Style="{StaticResource AccentButtonStyle}" />
+                        <Button Content="Start Compression" />
+                    </StackPanel>
+
+                    <TextBlock Text="{x:Bind ViewModel.StatusMessage, Mode=OneWay}" 
+                               Style="{StaticResource CaptionTextBlockStyle}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                </StackPanel>
+            </Border>
+
+        </StackPanel>
+    </ScrollViewer>
+</Page>

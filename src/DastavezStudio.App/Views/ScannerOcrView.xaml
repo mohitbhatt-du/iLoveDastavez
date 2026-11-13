@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Page
+    x:Class="DastavezStudio.App.Views.ScannerOcrView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="using:DastavezStudio.App.Views"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Spacing="20" Padding="32,24,32,32" MaxWidth="1100" HorizontalAlignment="Left">
+            
+            <StackPanel Spacing="4">
+                <TextBlock Text="Document Scanner &amp; Offline OCR" Style="{StaticResource TitleTextBlockStyle}" FontWeight="Bold" />
+                <TextBlock Text="Perspective correction, border auto-crop, shadow removal, and offline text extraction into searchable PDF." 
+                           Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+            </StackPanel>
+
+            <!-- Enhancement Options -->
+            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                    BorderThickness="1"
+                    CornerRadius="8"
+                    Padding="20">
+                <StackPanel Spacing="16">
+                    <TextBlock Text="Scanned Document Cleaning" Style="{StaticResource SubtitleTextBlockStyle}" FontWeight="SemiBold" />
+                    
+                    <StackPanel Orientation="Horizontal" Spacing="24">
+                        <CheckBox Content="Auto-Deskew &amp; Perspective Correction" IsChecked="{x:Bind ViewModel.AutoDeskew, Mode=TwoWay}" />
+                        <CheckBox Content="Shadow &amp; Crease Removal" IsChecked="{x:Bind ViewModel.ShadowRemoval, Mode=TwoWay}" />
+                        <CheckBox Content="Black &amp; White Clean Contrast" IsChecked="{x:Bind ViewModel.DocumentCleanup, Mode=TwoWay}" />
+                    </StackPanel>
+
+                    <StackPanel Orientation="Horizontal" Spacing="12">
+                        <Button Content="Select Scanned Image..." Style="{StaticResource AccentButtonStyle}" />
+                        <Button Content="Clean Document" />
+                        <Button Content="Extract Text (OCR)" />
+                        <Button Content="Export Searchable PDF" />
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <!-- OCR Text Results Area -->
+            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                    BorderThickness="1"
+                    CornerRadius="8"
+                    Padding="20">
+                <StackPanel Spacing="10">
+                    <TextBlock Text="Extracted Text Output" Style="{StaticResource SubtitleTextBlockStyle}" FontWeight="SemiBold" />
+                    <TextBox Text="{x:Bind ViewModel.ExtractedText, Mode=TwoWay}" 
+                             AcceptsReturn="True" 
+                             Height="180" 
+                             TextWrapping="Wrap" 
+                             PlaceholderText="OCR extracted text will appear here. No data is sent across any network." />
+                </StackPanel>
+            </Border>
+
+        </StackPanel>
+    </ScrollViewer>
+</Page>

@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Page
+    x:Class="DastavezStudio.App.Views.SettingsView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="using:DastavezStudio.App.Views"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Spacing="20" Padding="32,24,32,32" MaxWidth="900" HorizontalAlignment="Left">
+            
+            <StackPanel Spacing="4">
+                <TextBlock Text="Settings &amp; Preferences" Style="{StaticResource TitleTextBlockStyle}" FontWeight="Bold" />
+                <TextBlock Text="Configure theme, default directories, DPI preferences, and security cleanup." 
+                           Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+            </StackPanel>
+
+            <!-- Appearance -->
+            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                    BorderThickness="1"
+                    CornerRadius="8"
+                    Padding="20">
+                <StackPanel Spacing="16">
+                    <TextBlock Text="Appearance &amp; Theme" Style="{StaticResource SubtitleTextBlockStyle}" FontWeight="SemiBold" />
+                    
+                    <RadioButtons Header="App Theme" SelectedIndex="0">
+                        <RadioButton Content="Follow Windows System Theme" />
+                        <RadioButton Content="Light Theme" />
+                        <RadioButton Content="Dark Theme" />
+                    </RadioButtons>
+                </StackPanel>
+            </Border>
+
+            <!-- Temporary Storage & Privacy Cleanup -->
+            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                    BorderThickness="1"
+                    CornerRadius="8"
+                    Padding="20">
+                <StackPanel Spacing="16">
+                    <TextBlock Text="Temporary Storage &amp; Privacy Hygiene" Style="{StaticResource SubtitleTextBlockStyle}" FontWeight="SemiBold" />
+                    
+                    <CheckBox Content="Purge temporary session files immediately on application exit" 
+                              IsChecked="{x:Bind ViewModel.AutoCleanTempOnExit, Mode=TwoWay}" />
+
+                    <Button Content="Purge Temporary Cache Now" Command="{x:Bind ViewModel.CleanTemporaryFilesCommand}" />
+
+                    <TextBlock Text="{x:Bind ViewModel.CleanupStatus, Mode=OneWay}" 
+                               Style="{StaticResource CaptionTextBlockStyle}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                </StackPanel>
+            </Border>
+
+        </StackPanel>
+    </ScrollViewer>
+</Page>
