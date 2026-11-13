@@ -11,6 +11,7 @@ obj/
 ## Build Results
 [Dd]ebug/
 [Rr]elease/
+artifacts/
 x64/
 x86/
 ARM64/

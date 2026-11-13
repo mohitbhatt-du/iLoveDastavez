@@ -1,0 +1,66 @@
+name: Release Engineering & Packaging
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+jobs:
+  package-and-release:
+    name: Package Installer & Portable Bundle
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Restore dependencies
+        run: dotnet restore DastavezStudio.slnx
+
+      - name: Run unit test suite
+        run: dotnet test tests/DastavezStudio.UnitTests/DastavezStudio.UnitTests.csproj -c Release
+
+      - name: Publish WinUI 3 App (win-x64)
+        run: >
+          dotnet publish src/DastavezStudio.App/DastavezStudio.App.csproj
+          -c Release
+          -r win-x64
+          --no-self-contained
+          -o artifacts/publish/win-x64
+
+      - name: Create Portable ZIP
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Path artifacts/dist -Force
+          Compress-Archive -Path artifacts/publish/win-x64/* -DestinationPath artifacts/dist/DastavezStudio-Portable-win-x64.zip -Force
+
+      - name: Setup Inno Setup
+        uses: Kevin-De-Koninck/InnoSetupAction@v1.0.4
+        with:
+          issPath: packaging/installer.iss
+
+      - name: Compute SHA-256 Checksums
+        shell: pwsh
+        run: |
+          $files = Get-ChildItem -Path artifacts/dist/* -Include *.zip, *.exe
+          foreach ($f in $files) {
+            $hash = (Get-FileHash -Path $f.FullName -Algorithm SHA256).Hash.ToLower()
+            "$hash  $($f.Name)" | Out-File -FilePath artifacts/dist/SHA256SUMS.txt -Append -Encoding ascii
+          }
+          Get-Content artifacts/dist/SHA256SUMS.txt
+
+      - name: Upload Artifacts to Release
+        uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: |
+            artifacts/dist/DastavezStudio-Setup.exe
+            artifacts/dist/DastavezStudio-Portable-win-x64.zip
+            artifacts/dist/SHA256SUMS.txt
+          generate_release_notes: true
