@@ -3,6 +3,8 @@ using Microsoft.UI.Xaml;
 using DastavezStudio.App.ViewModels;
 using DastavezStudio.Core.Interfaces;
 using DastavezStudio.ExamPresets;
+using DastavezStudio.ImageEngine;
+using DastavezStudio.PdfEngine;
 using DastavezStudio.Security;
 
 namespace DastavezStudio.App;
@@ -27,9 +29,11 @@ public partial class App : Application
     {
         var services = new ServiceCollection();
 
-        // Core Infrastructure
+        // Core Infrastructure & Engines
         services.AddSingleton<ITempFileManager, TempFileManager>();
         services.AddSingleton<IExamPresetService, ExamPresetService>();
+        services.AddSingleton<IImageProcessor, ImageProcessor>();
+        services.AddSingleton<IPdfProcessor, PdfProcessor>();
 
         // ViewModels
         services.AddTransient<MainPageViewModel>();

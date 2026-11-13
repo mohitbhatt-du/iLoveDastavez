@@ -134,10 +134,13 @@
 
                     <!-- Action Controls -->
                     <StackPanel Orientation="Horizontal" Spacing="12">
-                        <Button Content="Auto-Conform to Preset" Style="{StaticResource AccentButtonStyle}" />
-                        <Button Content="Crop / Adjust Ratio" />
-                        <Button Content="Compress to Target KB" />
-                        <Button Content="Export &amp; Save" />
+                        <Button Content="Auto-Conform to Preset" 
+                                Command="{x:Bind ViewModel.AutoConformCommand}"
+                                Style="{StaticResource AccentButtonStyle}" />
+                        <Button Content="Re-Validate" 
+                                Command="{x:Bind ViewModel.ValidateCurrentFileCommand}" />
+                        <Button Content="Export &amp; Save" 
+                                Click="OnExportClicked" />
                     </StackPanel>
                 </StackPanel>
             </Border>

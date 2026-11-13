@@ -34,4 +34,26 @@ public sealed partial class ExamStudioView : Page
             await ViewModel.SetInputFileAsync(file.Path);
         }
     }
+
+    private async void OnExportClicked(object sender, RoutedEventArgs e)
+    {
+        var sourceFile = ViewModel.ProcessedFilePath ?? ViewModel.InputFilePath;
+        if (string.IsNullOrEmpty(sourceFile) || !File.Exists(sourceFile))
+        {
+            return;
+        }
+
+        var savePicker = new FileSavePicker();
+        InitializeWithWindow.Initialize(savePicker, App.WindowHandle);
+        savePicker.SuggestedStartLocation = PickerLocationId.PicturesLibrary;
+        savePicker.FileTypeChoices.Add("JPEG Image", new List<string> { ".jpg" });
+        savePicker.SuggestedFileName = $"Conformed_{ViewModel.SelectedPreset?.Authority}_{Path.GetFileNameWithoutExtension(sourceFile)}";
+
+        var targetFile = await savePicker.PickSaveFileAsync();
+        if (targetFile != null)
+        {
+            File.Copy(sourceFile, targetFile.Path, overwrite: true);
+            ViewModel.StatusMessage = $"✓ Document successfully saved to: {targetFile.Path}";
+        }
+    }
 }

@@ -9,6 +9,8 @@ namespace DastavezStudio.App.ViewModels;
 public partial class ExamStudioViewModel : ObservableObject
 {
     private readonly IExamPresetService _presetService;
+    private readonly IImageProcessor _imageProcessor;
+    private readonly ITempFileManager _tempFileManager;
 
     [ObservableProperty]
     public partial string SelectedAuthority { get; set; } = string.Empty;
@@ -23,6 +25,9 @@ public partial class ExamStudioViewModel : ObservableObject
     public partial string? InputFileName { get; set; }
 
     [ObservableProperty]
+    public partial string? ProcessedFilePath { get; set; }
+
+    [ObservableProperty]
     public partial string StatusMessage { get; set; } = "Select an examination authority and document preset to begin.";
 
     [ObservableProperty]
@@ -34,9 +39,14 @@ public partial class ExamStudioViewModel : ObservableObject
     public ObservableCollection<string> Authorities { get; } = new();
     public ObservableCollection<ExamPreset> FilteredPresets { get; } = new();
 
-    public ExamStudioViewModel(IExamPresetService presetService)
+    public ExamStudioViewModel(
+        IExamPresetService presetService,
+        IImageProcessor imageProcessor,
+        ITempFileManager tempFileManager)
     {
         _presetService = presetService;
+        _imageProcessor = imageProcessor;
+        _tempFileManager = tempFileManager;
         _ = LoadInitialDataAsync();
     }
 
@@ -89,19 +99,44 @@ public partial class ExamStudioViewModel : ObservableObject
     {
         InputFilePath = path;
         InputFileName = Path.GetFileName(path);
+        ProcessedFilePath = null;
         await ValidateCurrentFileAsync();
     }
 
     [RelayCommand]
     public async Task ValidateCurrentFileAsync()
     {
-        if (string.IsNullOrEmpty(InputFilePath) || SelectedPreset == null)
+        var targetFile = ProcessedFilePath ?? InputFilePath;
+        if (string.IsNullOrEmpty(targetFile) || SelectedPreset == null)
             return;
 
         IsProcessing = true;
         StatusMessage = "Analyzing document compliance...";
 
-        Compliance = await _presetService.ValidateComplianceAsync(InputFilePath, SelectedPreset);
+        Compliance = await _presetService.ValidateComplianceAsync(targetFile, SelectedPreset);
+
+        try
+        {
+            var dims = await _imageProcessor.GetImageDimensionsAsync(targetFile);
+            Compliance.ActualWidthPx = dims.Width;
+            Compliance.ActualHeightPx = dims.Height;
+            Compliance.ActualDpi = dims.DpiX;
+
+            if (SelectedPreset.RequiredWidthPx > 0 && 
+                (dims.Width != SelectedPreset.RequiredWidthPx || dims.Height != SelectedPreset.RequiredHeightPx))
+            {
+                Compliance.Issues.Add(new ComplianceIssue
+                {
+                    Severity = ComplianceSeverity.Error,
+                    Property = "Dimensions",
+                    Message = $"Dimensions are {dims.Width}x{dims.Height} px, but required is {SelectedPreset.RequiredWidthPx}x{SelectedPreset.RequiredHeightPx} px."
+                });
+            }
+        }
+        catch
+        {
+            // If PDF or non-image format
+        }
 
         if (Compliance.IsCompliant)
         {
@@ -113,5 +148,37 @@ public partial class ExamStudioViewModel : ObservableObject
         }
 
         IsProcessing = false;
+    }
+
+    [RelayCommand]
+    public async Task AutoConformAsync()
+    {
+        if (string.IsNullOrEmpty(InputFilePath) || SelectedPreset == null)
+        {
+            StatusMessage = "Please select an input image first.";
+            return;
+        }
+
+        IsProcessing = true;
+        StatusMessage = $"Processing document to match {SelectedPreset.Authority} ({SelectedPreset.DocumentType}) specs...";
+
+        try
+        {
+            var tempOut = _tempFileManager.GetTempFilePath(".jpg");
+            await _imageProcessor.ProcessForExamPresetAsync(InputFilePath, tempOut, SelectedPreset);
+            ProcessedFilePath = tempOut;
+
+            await ValidateCurrentFileAsync();
+
+            StatusMessage = $"✓ Document successfully conformed to {SelectedPreset.Authority} {SelectedPreset.ExamName} ({Compliance?.ActualWidthPx}x{Compliance?.ActualHeightPx} px, {Compliance?.ActualSizeKb:F1} KB)!";
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = $"Error processing document: {ex.Message}";
+        }
+        finally
+        {
+            IsProcessing = false;
+        }
     }
 }

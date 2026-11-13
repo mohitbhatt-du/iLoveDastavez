@@ -21,6 +21,8 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\DastavezStudio.Core\DastavezStudio.Core.csproj" />
     <ProjectReference Include="..\..\src\DastavezStudio.ExamPresets\DastavezStudio.ExamPresets.csproj" />
+    <ProjectReference Include="..\..\src\DastavezStudio.ImageEngine\DastavezStudio.ImageEngine.csproj" />
+    <ProjectReference Include="..\..\src\DastavezStudio.PdfEngine\DastavezStudio.PdfEngine.csproj" />
   </ItemGroup>
 
 </Project>
