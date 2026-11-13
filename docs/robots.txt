@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://mohitbhatt-du.github.io/iLoveDastavez/sitemap.xml
