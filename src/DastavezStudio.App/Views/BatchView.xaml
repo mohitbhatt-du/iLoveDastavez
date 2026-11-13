@@ -1,22 +1,167 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <Page
     x:Class="DastavezStudio.App.Views.BatchView"
+    x:Name="BatchPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="using:DastavezStudio.App.Views"
     xmlns:vm="using:DastavezStudio.App.ViewModels"
+    xmlns:models="using:DastavezStudio.Core.Models"
+    xmlns:conv="using:DastavezStudio.App.Converters"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
+
+    <Page.Resources>
+        <conv:BoolToVisibilityConverter x:Key="BoolToVis" />
+        <conv:InverseBoolToVisibilityConverter x:Key="InvBoolToVis" />
+        <conv:InverseBoolConverter x:Key="InvBool" />
+        <conv:StatusColorBrushConverter x:Key="StatusColor" />
+    </Page.Resources>
 
     <ScrollViewer VerticalScrollBarVisibility="Auto">
         <StackPanel Spacing="20" Padding="32,24,32,32" MaxWidth="1100" HorizontalAlignment="Left">
             
-            <StackPanel Spacing="4">
-                <TextBlock Text="Batch Processing Queue" Style="{StaticResource TitleTextBlockStyle}" FontWeight="Bold" />
-                <TextBlock Text="Bulk process multiple student documents or applicant photographs simultaneously with bounded concurrency." 
-                           Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-            </StackPanel>
+            <!-- Page Header & Metrics Summary -->
+            <Grid ColumnDefinitions="*,Auto" VerticalAlignment="Center">
+                <StackPanel Spacing="4">
+                    <TextBlock Text="Batch Processing Queue" Style="{StaticResource TitleTextBlockStyle}" FontWeight="Bold" />
+                    <TextBlock Text="Bulk process multiple student documents or applicant photographs simultaneously with bounded concurrency." 
+                               Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                </StackPanel>
+
+                <!-- Mini Metrics Counters -->
+                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="16" VerticalAlignment="Center">
+                    <Border Background="{ThemeResource LayerFillColorDefaultBrush}"
+                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                            BorderThickness="1" CornerRadius="6" Padding="12,6">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <TextBlock Text="Queue:" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                            <TextBlock Text="{x:Bind ViewModel.TotalCount, Mode=OneWay}" FontWeight="Bold" />
+                        </StackPanel>
+                    </Border>
+
+                    <Border Background="{ThemeResource LayerFillColorDefaultBrush}"
+                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                            BorderThickness="1" CornerRadius="6" Padding="12,6">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <TextBlock Text="Success:" Foreground="#107C41" FontWeight="SemiBold" />
+                            <TextBlock Text="{x:Bind ViewModel.SuccessCount, Mode=OneWay}" FontWeight="Bold" Foreground="#107C41" />
+                        </StackPanel>
+                    </Border>
+
+                    <Border Background="{ThemeResource LayerFillColorDefaultBrush}"
+                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                            BorderThickness="1" CornerRadius="6" Padding="12,6">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <TextBlock Text="Failed:" Foreground="#D13438" FontWeight="SemiBold" />
+                            <TextBlock Text="{x:Bind ViewModel.FailedCount, Mode=OneWay}" FontWeight="Bold" Foreground="#D13438" />
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </Grid>
+
+            <!-- Mode & Configuration Card -->
+            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                    BorderThickness="1"
+                    CornerRadius="8"
+                    Padding="20">
+                <StackPanel Spacing="16">
+                    <TextBlock Text="Batch Configuration &amp; Export Target" Style="{StaticResource SubtitleTextBlockStyle}" FontWeight="SemiBold" />
+
+                    <!-- Mode Selector -->
+                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="20">
+                        <StackPanel Spacing="6" Width="260">
+                            <TextBlock Text="Processing Mode" Style="{StaticResource BodyStrongTextBlockStyle}" />
+                            <ComboBox SelectedIndex="{x:Bind ViewModel.SelectedModeIndex, Mode=TwoWay}" HorizontalAlignment="Stretch">
+                                <ComboBoxItem Content="Exam Presets (IBPS, SBI, SSC...)" />
+                                <ComboBoxItem Content="Custom Dimensions &amp; KB Bounds" />
+                                <ComboBoxItem Content="PDF File Optimization" />
+                            </ComboBox>
+                        </StackPanel>
+
+                        <!-- Preset Mode Details -->
+                        <StackPanel Grid.Column="1" Spacing="6" 
+                                    Visibility="{x:Bind ViewModel.SelectedModeIndex, Mode=OneWay, Converter={StaticResource InvBoolToVis}}">
+                            <TextBlock Text="Target Examination Preset" Style="{StaticResource BodyStrongTextBlockStyle}" />
+                            <ComboBox ItemsSource="{x:Bind ViewModel.Presets}"
+                                      SelectedItem="{x:Bind ViewModel.SelectedPreset, Mode=TwoWay}"
+                                      HorizontalAlignment="Stretch">
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate x:DataType="models:ExamPreset">
+                                        <StackPanel Orientation="Horizontal" Spacing="10">
+                                            <TextBlock Text="{x:Bind Authority}" FontWeight="Bold" />
+                                            <TextBlock Text="—" Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
+                                            <TextBlock Text="{x:Bind ExamName}" />
+                                            <TextBlock Text="—" Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
+                                            <TextBlock Text="{x:Bind DocumentType}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                            <TextBlock Text=" (" Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
+                                            <TextBlock Text="{x:Bind RequiredWidthPx}" />
+                                            <TextBlock Text="×" />
+                                            <TextBlock Text="{x:Bind RequiredHeightPx}" />
+                                            <TextBlock Text=" px, " />
+                                            <TextBlock Text="{x:Bind MinSizeKb}" />
+                                            <TextBlock Text="-" />
+                                            <TextBlock Text="{x:Bind MaxSizeKb}" />
+                                            <TextBlock Text=" KB)" Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
+                            </ComboBox>
+                        </StackPanel>
+                    </Grid>
+
+                    <!-- Custom Resize & Compress Options -->
+                    <Grid ColumnDefinitions="*,*,*,*,*" ColumnSpacing="16"
+                          Visibility="{x:Bind ViewModel.SelectedModeIndex, Mode=OneWay, Converter={StaticResource BoolToVis}}">
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="Target Width (px)" Style="{StaticResource CaptionTextBlockStyle}" />
+                            <NumberBox Value="{x:Bind ViewModel.TargetWidth, Mode=TwoWay}" SpinButtonPlacementMode="Inline" SmallChange="10" Minimum="50" Maximum="4000" />
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="1" Spacing="4">
+                            <TextBlock Text="Target Height (px)" Style="{StaticResource CaptionTextBlockStyle}" />
+                            <NumberBox Value="{x:Bind ViewModel.TargetHeight, Mode=TwoWay}" SpinButtonPlacementMode="Inline" SmallChange="10" Minimum="50" Maximum="4000" />
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="2" Spacing="4">
+                            <TextBlock Text="Max File Size (KB)" Style="{StaticResource CaptionTextBlockStyle}" />
+                            <NumberBox Value="{x:Bind ViewModel.TargetMaxKb, Mode=TwoWay}" SpinButtonPlacementMode="Inline" SmallChange="5" Minimum="5" Maximum="10000" />
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="3" Spacing="4">
+                            <TextBlock Text="Format" Style="{StaticResource CaptionTextBlockStyle}" />
+                            <ComboBox ItemsSource="{x:Bind ViewModel.SupportedFormats}"
+                                      SelectedItem="{x:Bind ViewModel.SelectedFormat, Mode=TwoWay}"
+                                      HorizontalAlignment="Stretch" />
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="4" Spacing="4" VerticalAlignment="Bottom">
+                            <CheckBox Content="Grayscale (B&amp;W)" IsChecked="{x:Bind ViewModel.ConvertToGrayscale, Mode=TwoWay}" />
+                        </StackPanel>
+                    </Grid>
+
+                    <!-- Destination Folder & Concurrency -->
+                    <Grid ColumnDefinitions="*,Auto,Auto,Auto" ColumnSpacing="12" VerticalAlignment="Center">
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="Destination Output Folder" Style="{StaticResource CaptionTextBlockStyle}" />
+                            <TextBox Text="{x:Bind ViewModel.OutputDirectory, Mode=TwoWay}" IsReadOnly="False" />
+                        </StackPanel>
+
+                        <Button Grid.Column="1" Content="Browse..." VerticalAlignment="Bottom" Click="OnBrowseOutputFolderClicked" />
+                        <Button Grid.Column="2" Content="Open Folder" VerticalAlignment="Bottom" Command="{x:Bind ViewModel.OpenOutputFolderCommand}" />
+
+                        <StackPanel Grid.Column="3" Spacing="4" Width="180">
+                            <Grid ColumnDefinitions="*,Auto">
+                                <TextBlock Text="Parallel Workers:" Style="{StaticResource CaptionTextBlockStyle}" />
+                                <TextBlock Grid.Column="1" Text="{x:Bind ViewModel.MaxConcurrency, Mode=OneWay}" FontWeight="Bold" Style="{StaticResource CaptionTextBlockStyle}" />
+                            </Grid>
+                            <Slider Value="{x:Bind ViewModel.MaxConcurrency, Mode=TwoWay}" Minimum="1" Maximum="8" StepFrequency="1" TickFrequency="1" />
+                        </StackPanel>
+                    </Grid>
+                </StackPanel>
+            </Border>
 
             <!-- Actions Bar -->
             <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
@@ -24,29 +169,149 @@
                     BorderThickness="1"
                     CornerRadius="8"
                     Padding="16">
-                <Grid ColumnDefinitions="*,Auto">
-                    <StackPanel Orientation="Horizontal" Spacing="12">
-                        <Button Content="Add Files..." Style="{StaticResource AccentButtonStyle}" />
-                        <Button Content="Add Folder..." />
-                        <Button Content="Clear List" />
-                    </StackPanel>
+                <Grid ColumnDefinitions="Auto,Auto,Auto,*,Auto,Auto,Auto" ColumnSpacing="12">
+                    <Button Click="OnAddFilesClicked" Style="{StaticResource AccentButtonStyle}"
+                            IsEnabled="{x:Bind ViewModel.IsRunning, Mode=OneWay, Converter={StaticResource InvBool}}">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <FontIcon Glyph="&#xE8E5;" FontSize="16" />
+                            <TextBlock Text="Add Files..." />
+                        </StackPanel>
+                    </Button>
 
-                    <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="12">
-                        <Button Content="Start Processing" Style="{StaticResource AccentButtonStyle}" />
-                        <Button Content="Cancel" />
-                    </StackPanel>
+                    <Button Grid.Column="1" Click="OnAddFolderClicked"
+                            IsEnabled="{x:Bind ViewModel.IsRunning, Mode=OneWay, Converter={StaticResource InvBool}}">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <FontIcon Glyph="&#xED25;" FontSize="16" />
+                            <TextBlock Text="Add Folder..." />
+                        </StackPanel>
+                    </Button>
+
+                    <Button Grid.Column="2" Content="Clear List" Command="{x:Bind ViewModel.ClearQueueCommand}"
+                            IsEnabled="{x:Bind ViewModel.IsRunning, Mode=OneWay, Converter={StaticResource InvBool}}" />
+
+                    <!-- Right Controls -->
+                    <Button Grid.Column="4" Content="Retry Failed" Command="{x:Bind ViewModel.RetryFailedCommand}"
+                            Visibility="{x:Bind ViewModel.HasFailures, Mode=OneWay, Converter={StaticResource BoolToVis}}" />
+
+                    <Button Grid.Column="5" Content="Cancel" Command="{x:Bind ViewModel.CancelBatchCommand}"
+                            IsEnabled="{x:Bind ViewModel.IsRunning, Mode=OneWay}" />
+
+                    <Button Grid.Column="6" Content="Start Processing" Style="{StaticResource AccentButtonStyle}"
+                            Command="{x:Bind ViewModel.StartBatchCommand}"
+                            IsEnabled="{x:Bind ViewModel.HasQueue, Mode=OneWay}">
+                        <Button.KeyboardAccelerators>
+                            <KeyboardAccelerator Key="Enter" Modifiers="Control" />
+                        </Button.KeyboardAccelerators>
+                    </Button>
                 </Grid>
             </Border>
 
-            <!-- Progress Card -->
+            <!-- Progress & Completion Card -->
             <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                     BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                     BorderThickness="1"
                     CornerRadius="8"
                     Padding="20">
-                <StackPanel Spacing="10">
-                    <TextBlock Text="{x:Bind ViewModel.StatusMessage, Mode=OneWay}" Style="{StaticResource BodyStrongTextBlockStyle}" />
+                <StackPanel Spacing="12">
+                    <Grid ColumnDefinitions="*,Auto">
+                        <TextBlock Text="{x:Bind ViewModel.StatusMessage, Mode=OneWay}" Style="{StaticResource BodyStrongTextBlockStyle}" />
+                        <TextBlock Grid.Column="1" Text="{x:Bind ViewModel.ProgressSubtext, Mode=OneWay}" 
+                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                    </Grid>
+
                     <ProgressBar Value="{x:Bind ViewModel.OverallProgress, Mode=OneWay}" Maximum="100" />
+
+                    <!-- Completion Summary InfoBar -->
+                    <InfoBar IsOpen="{x:Bind ViewModel.IsCompleted, Mode=OneWay}"
+                             IsClosable="False"
+                             Severity="Success"
+                             Title="{x:Bind ViewModel.SummaryText, Mode=OneWay}"
+                             Message="{x:Bind ViewModel.BytesSavedText, Mode=OneWay}">
+                        <InfoBar.ActionButton>
+                            <Button Content="Open Output Folder" Command="{x:Bind ViewModel.OpenOutputFolderCommand}" />
+                        </InfoBar.ActionButton>
+                    </InfoBar>
+                </StackPanel>
+            </Border>
+
+            <!-- Virtualized Queue List -->
+            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                    BorderThickness="1"
+                    CornerRadius="8"
+                    Padding="16">
+                <StackPanel Spacing="12">
+                    <!-- Queue Table Header -->
+                    <Grid ColumnDefinitions="40,*,120,140,140,50" Padding="8,4">
+                        <TextBlock Text="#" Style="{StaticResource CaptionTextBlockStyle}" Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
+                        <TextBlock Grid.Column="1" Text="File Name &amp; Location" Style="{StaticResource CaptionTextBlockStyle}" Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
+                        <TextBlock Grid.Column="2" Text="Input Size" Style="{StaticResource CaptionTextBlockStyle}" Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
+                        <TextBlock Grid.Column="3" Text="Output Size" Style="{StaticResource CaptionTextBlockStyle}" Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
+                        <TextBlock Grid.Column="4" Text="Status" Style="{StaticResource CaptionTextBlockStyle}" Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
+                        <TextBlock Grid.Column="5" Text="" />
+                    </Grid>
+
+                    <!-- Items List -->
+                    <ListView ItemsSource="{x:Bind ViewModel.Queue}" SelectionMode="None">
+                        <ListView.ItemTemplate>
+                            <DataTemplate x:DataType="vm:BatchItemViewModel">
+                                <Grid ColumnDefinitions="40,*,120,140,140,50" Padding="8,6" VerticalAlignment="Center">
+                                    
+                                    <!-- Icon -->
+                                    <FontIcon Glyph="&#xEB9F;" FontSize="18" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+
+                                    <!-- Name & Path -->
+                                    <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2">
+                                        <TextBlock Text="{x:Bind FileName}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+                                        <TextBlock Text="{x:Bind DirectoryName}" Style="{StaticResource CaptionTextBlockStyle}" 
+                                                   Foreground="{ThemeResource TextFillColorTertiaryBrush}" TextTrimming="CharacterEllipsis" />
+                                    </StackPanel>
+
+                                    <!-- Input Size -->
+                                    <TextBlock Grid.Column="2" Text="{x:Bind InputSizeFormatted, Mode=OneWay}" VerticalAlignment="Center" />
+
+                                    <!-- Output Size + Saved % -->
+                                    <StackPanel Grid.Column="3" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                                        <TextBlock Text="{x:Bind OutputSizeFormatted, Mode=OneWay}" FontWeight="SemiBold" />
+                                        <TextBlock Text="{x:Bind SavingsPercentageFormatted, Mode=OneWay}" 
+                                                   Foreground="#107C41" FontWeight="Bold" Style="{StaticResource CaptionTextBlockStyle}" />
+                                    </StackPanel>
+
+                                    <!-- Status -->
+                                    <StackPanel Grid.Column="4" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                                        <ProgressRing IsActive="{x:Bind IsProcessing, Mode=OneWay}" Width="16" Height="16"
+                                                      Visibility="{x:Bind IsProcessing, Mode=OneWay}" />
+                                        <Border CornerRadius="4" Padding="6,2"
+                                                Background="{x:Bind Status, Mode=OneWay, Converter={StaticResource StatusColor}}">
+                                            <TextBlock Text="{x:Bind StatusText, Mode=OneWay}" Foreground="White" 
+                                                       FontSize="11" FontWeight="SemiBold" />
+                                        </Border>
+                                        <FontIcon Glyph="&#xE783;" FontSize="14" Foreground="#D13438"
+                                                  Visibility="{x:Bind IsFailed, Mode=OneWay}">
+                                            <ToolTipService.ToolTip>
+                                                <ToolTip Content="{x:Bind ErrorMessage, Mode=OneWay}" />
+                                            </ToolTipService.ToolTip>
+                                        </FontIcon>
+                                    </StackPanel>
+
+                                    <!-- Remove Button -->
+                                    <Button Grid.Column="5" Command="{Binding ElementName=BatchPage, Path=ViewModel.RemoveItemCommand}"
+                                            CommandParameter="{x:Bind}" Padding="4">
+                                        <FontIcon Glyph="&#xE74D;" FontSize="14" />
+                                    </Button>
+                                </Grid>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
+
+                    <!-- Empty State Placeholder -->
+                    <StackPanel Spacing="8" HorizontalAlignment="Center" Margin="0,30,0,30"
+                                Visibility="{x:Bind ViewModel.HasQueue, Mode=OneWay, Converter={StaticResource InvBoolToVis}}">
+                        <FontIcon Glyph="&#xED25;" FontSize="36" Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
+                        <TextBlock Text="Queue is currently empty" Style="{StaticResource SubtitleTextBlockStyle}" HorizontalAlignment="Center" />
+                        <TextBlock Text="Click 'Add Files...' or 'Add Folder...' above to load photos, certificates or signatures." 
+                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" />
+                    </StackPanel>
                 </StackPanel>
             </Border>
 

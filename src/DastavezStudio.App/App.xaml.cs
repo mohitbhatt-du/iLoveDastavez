@@ -2,6 +2,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
 using DastavezStudio.App.ViewModels;
 using DastavezStudio.Core.Interfaces;
+using DastavezStudio.Core.Services;
 using DastavezStudio.ExamPresets;
 using DastavezStudio.ImageEngine;
 using DastavezStudio.PdfEngine;
@@ -34,6 +35,7 @@ public partial class App : Application
         services.AddSingleton<IExamPresetService, ExamPresetService>();
         services.AddSingleton<IImageProcessor, ImageProcessor>();
         services.AddSingleton<IPdfProcessor, PdfProcessor>();
+        services.AddSingleton<IBatchProcessor, BatchProcessor>();
 
         // ViewModels
         services.AddTransient<MainPageViewModel>();
