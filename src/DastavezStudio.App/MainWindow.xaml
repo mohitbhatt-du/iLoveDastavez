@@ -6,7 +6,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="using:DastavezStudio.App"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    Title="Dastavez Studio — iLoveDastavez"
+    Title="Dastavez Studio — iLoveDastavez (हर दस्तावेज़, तैयार!)"
     mc:Ignorable="d">
     <Window.SystemBackdrop>
         <MicaBackdrop />
@@ -18,16 +18,14 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <TitleBar x:Name="AppTitleBar" Title="DastavezStudio.App">
+        <TitleBar x:Name="AppTitleBar" Title="Dastavez Studio — iLoveDastavez (हर दस्तावेज़, तैयार!)">
             <TitleBar.IconSource>
-                <ImageIconSource ImageSource="Assets/AppIcon.ico" />
+                <ImageIconSource ImageSource="Assets/AppLogo_Small.png" />
             </TitleBar.IconSource>
         </TitleBar>
 
         <!--
-            The Frame hosts pages for your application content. Add your UI to
-            MainPage.xaml rather than here so you can use Page features such as
-            navigation events and the Loaded lifecycle.
+            The Frame hosts pages for your application content.
         -->
         <Frame x:Name="RootFrame" Grid.Row="1" />
     </Grid>

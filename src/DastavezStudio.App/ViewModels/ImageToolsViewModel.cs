@@ -1,7 +1,12 @@
+using System;
+using System.IO;
+using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using DastavezStudio.App.Helpers;
 using DastavezStudio.Core.Interfaces;
 using DastavezStudio.Core.Models;
+using Microsoft.UI.Xaml.Media.Imaging;
 
 namespace DastavezStudio.App.ViewModels;
 
@@ -18,6 +23,30 @@ public partial class ImageToolsViewModel : ObservableObject
 
     [ObservableProperty]
     public partial string? ProcessedFilePath { get; set; }
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasSourceImage))]
+    public partial BitmapImage? SourceImage { get; set; }
+
+    public bool HasSourceImage => SourceImage != null;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasProcessedImage))]
+    public partial BitmapImage? ProcessedImage { get; set; }
+
+    public bool HasProcessedImage => ProcessedImage != null;
+
+    [ObservableProperty]
+    public partial string OriginalDimensions { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial string OriginalFileSize { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial string ProcessedDimensions { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial string ProcessedFileSize { get; set; } = string.Empty;
 
     [ObservableProperty]
     public partial int TargetWidth { get; set; } = 800;
@@ -66,9 +95,17 @@ public partial class ImageToolsViewModel : ObservableObject
 
     public async Task SetInputFileAsync(string path)
     {
+        if (!File.Exists(path)) return;
+
         InputFilePath = path;
         InputFileName = Path.GetFileName(path);
         ProcessedFilePath = null;
+        ProcessedImage = null;
+        ProcessedDimensions = string.Empty;
+        ProcessedFileSize = string.Empty;
+
+        // Load source image in-memory
+        SourceImage = await ImagePreviewHelper.LoadBitmapFromFileAsync(path);
 
         try
         {
@@ -79,8 +116,14 @@ public partial class ImageToolsViewModel : ObservableObject
             TargetHeight = dims.Height;
             TargetDpi = dims.DpiX;
 
+            OriginalDimensions = $"{dims.Width} × {dims.Height} px";
             var sizeKb = new FileInfo(path).Length / 1024.0;
-            StatusMessage = $"Loaded: {InputFileName} ({dims.Width}x{dims.Height} px, {sizeKb:F1} KB, {dims.Format})";
+            OriginalFileSize = sizeKb >= 1024 ? $"{sizeKb / 1024.0:F2} MB" : $"{sizeKb:F1} KB";
+
+            StatusMessage = $"Loaded: {InputFileName} ({dims.Width}x{dims.Height} px, {OriginalFileSize}, {dims.Format})";
+
+            // Automatically generate processed preview
+            await ProcessImageAsync();
         }
         catch (Exception ex)
         {
@@ -134,10 +177,16 @@ public partial class ImageToolsViewModel : ObservableObject
             });
 
             ProcessedFilePath = tempCompressed;
-            var outDims = await _imageProcessor.GetImageDimensionsAsync(tempCompressed);
-            var outSizeKb = new FileInfo(tempCompressed).Length / 1024.0;
 
-            StatusMessage = $"✓ Processed successfully! Output: {outDims.Width}x{outDims.Height} px, {outSizeKb:F1} KB.";
+            // Load processed image preview in-memory
+            ProcessedImage = await ImagePreviewHelper.LoadBitmapFromFileAsync(tempCompressed);
+
+            var outDims = await _imageProcessor.GetImageDimensionsAsync(tempCompressed);
+            ProcessedDimensions = $"{outDims.Width} × {outDims.Height} px";
+            var outSizeKb = new FileInfo(tempCompressed).Length / 1024.0;
+            ProcessedFileSize = $"{outSizeKb:F1} KB";
+
+            StatusMessage = $"✓ Processed successfully! Output: {outDims.Width}x{outDims.Height} px, {ProcessedFileSize}.";
         }
         catch (Exception ex)
         {

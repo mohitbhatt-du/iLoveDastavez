@@ -5,15 +5,21 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="using:DastavezStudio.App.Views"
+    xmlns:conv="using:DastavezStudio.App.Converters"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
 
+    <Page.Resources>
+        <conv:BoolToVisibilityConverter x:Key="BoolToVis" />
+        <conv:InverseBoolToVisibilityConverter x:Key="InvBoolToVis" />
+    </Page.Resources>
+
     <ScrollViewer VerticalScrollBarVisibility="Auto">
-        <StackPanel Spacing="20" Padding="32,24,32,32" MaxWidth="1100" HorizontalAlignment="Left">
+        <StackPanel Spacing="20" Padding="32,24,32,32" MaxWidth="1140" HorizontalAlignment="Left">
             
             <StackPanel Spacing="4">
                 <TextBlock Text="Image Toolkit" Style="{StaticResource TitleTextBlockStyle}" FontWeight="Bold" />
-                <TextBlock Text="Precision pixel resizing, iterative target KB compression, DPI formatting, and metadata privacy scrubbing." 
+                <TextBlock Text="Precision pixel resizing, iterative target KB compression, DPI formatting, and metadata privacy scrubbing with live preview." 
                            Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
             </StackPanel>
 
@@ -79,26 +85,146 @@
                 </Border>
             </Grid>
 
+            <!-- LIVE PREVIEW CONTAINER (SIDE-BY-SIDE: BEFORE vs AFTER) -->
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="20">
+                <!-- Original Image Preview -->
+                <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                        BorderThickness="1"
+                        CornerRadius="8"
+                        Padding="16">
+                    <Grid RowDefinitions="Auto,*,Auto" RowSpacing="12">
+                        <Grid ColumnDefinitions="*,Auto" VerticalAlignment="Center">
+                            <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                                <FontIcon Glyph="&#xEB9F;" FontSize="16" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                <TextBlock Text="Source Image" Style="{StaticResource BodyStrongTextBlockStyle}" />
+                            </StackPanel>
+
+                            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6" Visibility="{x:Bind ViewModel.HasSourceImage, Mode=OneWay, Converter={StaticResource BoolToVis}}">
+                                <Border Background="{ThemeResource LayerFillColorDefaultBrush}" CornerRadius="4" Padding="6,2">
+                                    <TextBlock Text="{x:Bind ViewModel.OriginalDimensions, Mode=OneWay}" Style="{StaticResource CaptionTextBlockStyle}" />
+                                </Border>
+                                <Border Background="{ThemeResource LayerFillColorDefaultBrush}" CornerRadius="4" Padding="6,2">
+                                    <TextBlock Text="{x:Bind ViewModel.OriginalFileSize, Mode=OneWay}" Style="{StaticResource CaptionTextBlockStyle}" />
+                                </Border>
+                            </StackPanel>
+                        </Grid>
+
+                        <Border Grid.Row="1" Height="280"
+                                Background="{ThemeResource LayerFillColorAltBrush}"
+                                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                BorderThickness="1"
+                                CornerRadius="6"
+                                Padding="8">
+                            <Grid>
+                                <Image Source="{x:Bind ViewModel.SourceImage, Mode=OneWay}"
+                                       Stretch="Uniform"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center"
+                                       Visibility="{x:Bind ViewModel.HasSourceImage, Mode=OneWay, Converter={StaticResource BoolToVis}}" />
+
+                                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="8"
+                                            Visibility="{x:Bind ViewModel.HasSourceImage, Mode=OneWay, Converter={StaticResource InvBoolToVis}}">
+                                    <FontIcon Glyph="&#xEB9F;" FontSize="36" Foreground="{ThemeResource TextFillColorTertiaryBrush}" HorizontalAlignment="Center" />
+                                    <TextBlock Text="No source image loaded" Style="{StaticResource BodyStrongTextBlockStyle}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" />
+                                    <TextBlock Text="Click Select Source Image below" Style="{StaticResource CaptionTextBlockStyle}" Foreground="{ThemeResource TextFillColorTertiaryBrush}" HorizontalAlignment="Center" />
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+
+                        <TextBlock Grid.Row="2" Text="{x:Bind ViewModel.InputFileName, Mode=OneWay, FallbackValue='No image selected'}"
+                                   Style="{StaticResource CaptionTextBlockStyle}"
+                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                   TextTrimming="CharacterEllipsis" />
+                    </Grid>
+                </Border>
+
+                <!-- Processed Image Preview -->
+                <Border Grid.Column="1"
+                        Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                        BorderThickness="1"
+                        CornerRadius="8"
+                        Padding="16">
+                    <Grid RowDefinitions="Auto,*,Auto" RowSpacing="12">
+                        <Grid ColumnDefinitions="*,Auto" VerticalAlignment="Center">
+                            <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                                <FontIcon Glyph="&#xE73E;" FontSize="16" Foreground="{ThemeResource SystemFillColorSuccessBrush}" />
+                                <TextBlock Text="Live Processed Preview" Style="{StaticResource BodyStrongTextBlockStyle}" />
+                            </StackPanel>
+
+                            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6" Visibility="{x:Bind ViewModel.HasProcessedImage, Mode=OneWay, Converter={StaticResource BoolToVis}}">
+                                <Border Background="{ThemeResource SystemFillColorSuccessBackgroundBrush}" CornerRadius="4" Padding="6,2" BorderBrush="{ThemeResource SystemFillColorSuccessBrush}" BorderThickness="1">
+                                    <TextBlock Text="{x:Bind ViewModel.ProcessedDimensions, Mode=OneWay}" Style="{StaticResource CaptionTextBlockStyle}" Foreground="{ThemeResource SystemFillColorSuccessBrush}" FontWeight="SemiBold" />
+                                </Border>
+                                <Border Background="{ThemeResource SystemFillColorSuccessBackgroundBrush}" CornerRadius="4" Padding="6,2" BorderBrush="{ThemeResource SystemFillColorSuccessBrush}" BorderThickness="1">
+                                    <TextBlock Text="{x:Bind ViewModel.ProcessedFileSize, Mode=OneWay}" Style="{StaticResource CaptionTextBlockStyle}" Foreground="{ThemeResource SystemFillColorSuccessBrush}" FontWeight="SemiBold" />
+                                </Border>
+                            </StackPanel>
+                        </Grid>
+
+                        <Border Grid.Row="1" Height="280"
+                                Background="{ThemeResource LayerFillColorAltBrush}"
+                                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                BorderThickness="1"
+                                CornerRadius="6"
+                                Padding="8">
+                            <Grid>
+                                <Image Source="{x:Bind ViewModel.ProcessedImage, Mode=OneWay}"
+                                       Stretch="Uniform"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center"
+                                       Visibility="{x:Bind ViewModel.HasProcessedImage, Mode=OneWay, Converter={StaticResource BoolToVis}}" />
+
+                                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="8"
+                                            Visibility="{x:Bind ViewModel.HasProcessedImage, Mode=OneWay, Converter={StaticResource InvBoolToVis}}">
+                                    <FontIcon Glyph="&#xE790;" FontSize="36" Foreground="{ThemeResource TextFillColorTertiaryBrush}" HorizontalAlignment="Center" />
+                                    <TextBlock Text="Processed Preview" Style="{StaticResource BodyStrongTextBlockStyle}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" />
+                                    <TextBlock Text="Adjust settings and click Process Image to preview" Style="{StaticResource CaptionTextBlockStyle}" Foreground="{ThemeResource TextFillColorTertiaryBrush}" HorizontalAlignment="Center" />
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+
+                        <Grid Grid.Row="2" ColumnDefinitions="*,Auto">
+                            <TextBlock Text="{x:Bind ViewModel.StatusMessage, Mode=OneWay}"
+                                       Style="{StaticResource CaptionTextBlockStyle}"
+                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                       VerticalAlignment="Center"
+                                       TextTrimming="CharacterEllipsis" />
+                            
+                            <Border Grid.Column="1" Background="{ThemeResource SystemFillColorSuccessBackgroundBrush}"
+                                    CornerRadius="4" Padding="8,2"
+                                    Visibility="{x:Bind ViewModel.HasProcessedImage, Mode=OneWay, Converter={StaticResource BoolToVis}}">
+                                <TextBlock Text="Ready ✓" FontSize="11" Foreground="{ThemeResource SystemFillColorSuccessBrush}" FontWeight="Bold" />
+                            </Border>
+                        </Grid>
+                    </Grid>
+                </Border>
+            </Grid>
+
             <!-- File Status & Actions Bar -->
             <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                     BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                     BorderThickness="1"
                     CornerRadius="8"
                     Padding="16">
-                <StackPanel Spacing="12">
+                <Grid ColumnDefinitions="*,Auto">
                     <TextBlock Text="{x:Bind ViewModel.StatusMessage, Mode=OneWay}" 
-                               Style="{StaticResource BodyStrongTextBlockStyle}" />
+                               Style="{StaticResource BodyStrongTextBlockStyle}"
+                               VerticalAlignment="Center" />
 
-                    <StackPanel Orientation="Horizontal" Spacing="12">
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="12">
                         <Button Content="Select Source Image..." 
                                 Click="OnSelectFileClicked" 
                                 Style="{StaticResource AccentButtonStyle}" />
                         <Button Content="Process Image" 
-                                Command="{x:Bind ViewModel.ProcessImageCommand}" />
+                                Command="{x:Bind ViewModel.ProcessImageCommand}"
+                                IsEnabled="{x:Bind ViewModel.HasSourceImage, Mode=OneWay}" />
                         <Button Content="Export &amp; Save" 
-                                Click="OnExportClicked" />
+                                Click="OnExportClicked"
+                                IsEnabled="{x:Bind ViewModel.HasProcessedImage, Mode=OneWay}" />
                     </StackPanel>
-                </StackPanel>
+                </Grid>
             </Border>
 
         </StackPanel>

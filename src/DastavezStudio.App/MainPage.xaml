@@ -17,9 +17,12 @@
                         Loaded="OnNavViewLoaded">
             
             <NavigationView.PaneHeader>
-                <StackPanel Orientation="Horizontal" Spacing="10" Margin="16,14,16,14" VerticalAlignment="Center">
-                    <FontIcon Glyph="&#xE8B7;" FontSize="20" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
-                    <TextBlock Text="Dastavez Studio" Style="{StaticResource BodyStrongTextBlockStyle}" FontSize="15" FontWeight="SemiBold" />
+                <StackPanel Orientation="Horizontal" Spacing="12" Margin="14,12,14,12" VerticalAlignment="Center">
+                    <Image Source="Assets/AppLogo_Small.png" Width="30" Height="30" VerticalAlignment="Center" />
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Text="iLoveDastavez" Style="{StaticResource BodyStrongTextBlockStyle}" FontSize="14" FontWeight="Bold" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                        <TextBlock Text="Dastavez Studio" Style="{StaticResource CaptionTextBlockStyle}" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                    </StackPanel>
                 </StackPanel>
             </NavigationView.PaneHeader>
 

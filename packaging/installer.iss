@@ -19,6 +19,7 @@ DefaultDirName={autopf}\{#MyAppName}
 DefaultGroupName={#MyAppName}
 AllowNoIcons=yes
 LicenseFile=..\LICENSE
+SetupIconFile=..\src\DastavezStudio.App\Assets\AppIcon.ico
 OutputDir=..\artifacts\dist
 OutputBaseFilename=DastavezStudio-Setup
 Compression=lzma2/ultra64

@@ -2,8 +2,10 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using DastavezStudio.App.Helpers;
 using DastavezStudio.Core.Interfaces;
 using DastavezStudio.Core.Models;
+using Microsoft.UI.Xaml.Media.Imaging;
 using Windows.ApplicationModel.DataTransfer;
 
 namespace DastavezStudio.App.ViewModels;
@@ -28,6 +30,18 @@ public partial class ScannerOcrViewModel : ObservableObject
     public partial string? CleanedFilePath { get; set; }
 
     public bool HasCleanedFile => !string.IsNullOrEmpty(CleanedFilePath) && File.Exists(CleanedFilePath);
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasSourceImage))]
+    public partial BitmapImage? SourceImage { get; set; }
+
+    public bool HasSourceImage => SourceImage != null;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasCleanedImage))]
+    public partial BitmapImage? CleanedImage { get; set; }
+
+    public bool HasCleanedImage => CleanedImage != null;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasSearchablePdf))]
@@ -118,12 +132,15 @@ public partial class ScannerOcrViewModel : ObservableObject
         }
     }
 
-    public void SetInputFile(string filePath)
+    public void SetInputFile(string filePath) => _ = SetInputFileAsync(filePath);
+
+    public async Task SetInputFileAsync(string filePath)
     {
         if (!File.Exists(filePath)) return;
 
         InputFilePath = filePath;
         CleanedFilePath = null;
+        CleanedImage = null;
         SearchablePdfPath = null;
         ExtractedText = string.Empty;
         WordCount = 0;
@@ -131,6 +148,8 @@ public partial class ScannerOcrViewModel : ObservableObject
         DetectedSkewAngle = null;
         ResultDetails = string.Empty;
         Progress = 0;
+
+        SourceImage = await ImagePreviewHelper.LoadBitmapFromFileAsync(filePath);
         StatusMessage = $"Loaded: {Path.GetFileName(filePath)}. Ready to scan or extract text.";
     }
 
@@ -173,6 +192,8 @@ public partial class ScannerOcrViewModel : ObservableObject
             var result = await _documentCleaner.CleanDocumentAsync(InputFilePath, tempOutput, options, progressReporter, _cts.Token);
             CleanedFilePath = result.OutputPath;
             DetectedSkewAngle = result.DetectedSkewAngleDegrees;
+
+            CleanedImage = await ImagePreviewHelper.LoadBitmapFromFileAsync(tempOutput);
 
             string deskewInfo = Math.Abs(result.DetectedSkewAngleDegrees) > 0.1
                 ? $"Straightened {result.DetectedSkewAngleDegrees:F1}° skew"

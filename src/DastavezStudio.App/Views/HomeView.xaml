@@ -18,8 +18,17 @@
                     BorderThickness="1"
                     CornerRadius="12"
                     Padding="28">
-                <Grid ColumnDefinitions="*,Auto">
-                    <StackPanel Spacing="8" VerticalAlignment="Center">
+                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="20">
+                    <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                            BorderThickness="1"
+                            CornerRadius="14"
+                            Padding="6"
+                            VerticalAlignment="Center">
+                        <Image Source="Assets/AppLogo.png" Width="80" Height="80" Stretch="Uniform" />
+                    </Border>
+
+                    <StackPanel Grid.Column="1" Spacing="8" VerticalAlignment="Center">
                         <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
                             <TextBlock Text="iLoveDastavez" 
                                        Style="{StaticResource TitleTextBlockStyle}" 
@@ -38,7 +47,7 @@
                     </StackPanel>
 
                     <!-- Offline Badge -->
-                    <Border Grid.Column="1" 
+                    <Border Grid.Column="2" 
                             Background="{ThemeResource SystemFillColorSuccessBackgroundBrush}"
                             BorderBrush="{ThemeResource SystemFillColorSuccessBrush}"
                             BorderThickness="1"

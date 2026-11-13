@@ -6,16 +6,22 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="using:DastavezStudio.App.Views"
     xmlns:models="using:DastavezStudio.Core.Models"
+    xmlns:conv="using:DastavezStudio.App.Converters"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
 
+    <Page.Resources>
+        <conv:BoolToVisibilityConverter x:Key="BoolToVis" />
+        <conv:InverseBoolToVisibilityConverter x:Key="InvBoolToVis" />
+    </Page.Resources>
+
     <ScrollViewer VerticalScrollBarVisibility="Auto">
-        <StackPanel Spacing="20" Padding="32,24,32,32" MaxWidth="1100" HorizontalAlignment="Left">
+        <StackPanel Spacing="20" Padding="32,24,32,32" MaxWidth="1140" HorizontalAlignment="Left">
             
             <!-- Page Header -->
             <StackPanel Spacing="4">
                 <TextBlock Text="Exam Document Studio" Style="{StaticResource TitleTextBlockStyle}" FontWeight="Bold" />
-                <TextBlock Text="Prepare photographs, signatures, declarations and certificates to exact examination guidelines." 
+                <TextBlock Text="Prepare photographs, signatures, declarations and certificates to exact examination guidelines with real-time live preview." 
                            Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
             </StackPanel>
 
@@ -106,43 +112,167 @@
                 </Grid>
             </Border>
 
+            <!-- LIVE PREVIEW WORKBENCH (SIDE-BY-SIDE: ORIGINAL vs CONFORMED) -->
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="20">
+                
+                <!-- Left: Original Source Document -->
+                <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                        BorderThickness="1"
+                        CornerRadius="8"
+                        Padding="16">
+                    <Grid RowDefinitions="Auto,*,Auto" RowSpacing="12">
+                        <!-- Card Header -->
+                        <Grid ColumnDefinitions="*,Auto" VerticalAlignment="Center">
+                            <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                                <FontIcon Glyph="&#xEB9F;" FontSize="16" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                <TextBlock Text="Original Document" Style="{StaticResource BodyStrongTextBlockStyle}" />
+                            </StackPanel>
+
+                            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6" Visibility="{x:Bind ViewModel.HasSourceImage, Mode=OneWay, Converter={StaticResource BoolToVis}}">
+                                <Border Background="{ThemeResource LayerFillColorDefaultBrush}" CornerRadius="4" Padding="6,2">
+                                    <TextBlock Text="{x:Bind ViewModel.SourceDimensions, Mode=OneWay}" Style="{StaticResource CaptionTextBlockStyle}" />
+                                </Border>
+                                <Border Background="{ThemeResource LayerFillColorDefaultBrush}" CornerRadius="4" Padding="6,2">
+                                    <TextBlock Text="{x:Bind ViewModel.SourceFileSize, Mode=OneWay}" Style="{StaticResource CaptionTextBlockStyle}" />
+                                </Border>
+                            </StackPanel>
+                        </Grid>
+
+                        <!-- Preview Canvas -->
+                        <Border Grid.Row="1" Height="300"
+                                Background="{ThemeResource LayerFillColorAltBrush}"
+                                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                BorderThickness="1"
+                                CornerRadius="6"
+                                Padding="8">
+                            <Grid>
+                                <!-- Image Preview -->
+                                <Image Source="{x:Bind ViewModel.SourceImage, Mode=OneWay}"
+                                       Stretch="Uniform"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center"
+                                       Visibility="{x:Bind ViewModel.HasSourceImage, Mode=OneWay, Converter={StaticResource BoolToVis}}" />
+
+                                <!-- Empty State Placeholder -->
+                                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="8"
+                                            Visibility="{x:Bind ViewModel.HasSourceImage, Mode=OneWay, Converter={StaticResource InvBoolToVis}}">
+                                    <FontIcon Glyph="&#xE8B7;" FontSize="36" Foreground="{ThemeResource TextFillColorTertiaryBrush}" HorizontalAlignment="Center" />
+                                    <TextBlock Text="No document loaded" Style="{StaticResource BodyStrongTextBlockStyle}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" />
+                                    <TextBlock Text="Browse or drag a photo/signature to view" Style="{StaticResource CaptionTextBlockStyle}" Foreground="{ThemeResource TextFillColorTertiaryBrush}" HorizontalAlignment="Center" />
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+
+                        <!-- Original Document File Name -->
+                        <TextBlock Grid.Row="2" Text="{x:Bind ViewModel.InputFileName, Mode=OneWay, FallbackValue='Awaiting file selection'}"
+                                   Style="{StaticResource CaptionTextBlockStyle}"
+                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                   TextTrimming="CharacterEllipsis" />
+                    </Grid>
+                </Border>
+
+                <!-- Right: Conformed Live Output Preview -->
+                <Border Grid.Column="1"
+                        Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                        BorderThickness="1"
+                        CornerRadius="8"
+                        Padding="16">
+                    <Grid RowDefinitions="Auto,*,Auto" RowSpacing="12">
+                        <!-- Card Header -->
+                        <Grid ColumnDefinitions="*,Auto" VerticalAlignment="Center">
+                            <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                                <FontIcon Glyph="&#xE73E;" FontSize="16" Foreground="{ThemeResource SystemFillColorSuccessBrush}" />
+                                <TextBlock Text="Live Conformed Preview" Style="{StaticResource BodyStrongTextBlockStyle}" />
+                            </StackPanel>
+
+                            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6" Visibility="{x:Bind ViewModel.HasConformedImage, Mode=OneWay, Converter={StaticResource BoolToVis}}">
+                                <Border Background="{ThemeResource SystemFillColorSuccessBackgroundBrush}" CornerRadius="4" Padding="6,2" BorderBrush="{ThemeResource SystemFillColorSuccessBrush}" BorderThickness="1">
+                                    <TextBlock Text="{x:Bind ViewModel.ConformedDimensions, Mode=OneWay}" Style="{StaticResource CaptionTextBlockStyle}" Foreground="{ThemeResource SystemFillColorSuccessBrush}" FontWeight="SemiBold" />
+                                </Border>
+                                <Border Background="{ThemeResource SystemFillColorSuccessBackgroundBrush}" CornerRadius="4" Padding="6,2" BorderBrush="{ThemeResource SystemFillColorSuccessBrush}" BorderThickness="1">
+                                    <TextBlock Text="{x:Bind ViewModel.ConformedFileSize, Mode=OneWay}" Style="{StaticResource CaptionTextBlockStyle}" Foreground="{ThemeResource SystemFillColorSuccessBrush}" FontWeight="SemiBold" />
+                                </Border>
+                                <Border Background="{ThemeResource LayerFillColorDefaultBrush}" CornerRadius="4" Padding="6,2">
+                                    <TextBlock Text="{x:Bind ViewModel.ConformedDpi, Mode=OneWay}" Style="{StaticResource CaptionTextBlockStyle}" />
+                                </Border>
+                            </StackPanel>
+                        </Grid>
+
+                        <!-- Preview Canvas with Aspect Ratio Guide -->
+                        <Border Grid.Row="1" Height="300"
+                                Background="{ThemeResource LayerFillColorAltBrush}"
+                                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                BorderThickness="1"
+                                CornerRadius="6"
+                                Padding="8">
+                            <Grid>
+                                <!-- Conformed Image Preview -->
+                                <Image Source="{x:Bind ViewModel.ConformedImage, Mode=OneWay}"
+                                       Stretch="Uniform"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center"
+                                       Visibility="{x:Bind ViewModel.HasConformedImage, Mode=OneWay, Converter={StaticResource BoolToVis}}" />
+
+                                <!-- Empty State Placeholder -->
+                                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="8"
+                                            Visibility="{x:Bind ViewModel.HasConformedImage, Mode=OneWay, Converter={StaticResource InvBoolToVis}}">
+                                    <FontIcon Glyph="&#xE790;" FontSize="36" Foreground="{ThemeResource TextFillColorTertiaryBrush}" HorizontalAlignment="Center" />
+                                    <TextBlock Text="Conformed Preview" Style="{StaticResource BodyStrongTextBlockStyle}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" />
+                                    <TextBlock Text="Real-time upload-ready output will render here" Style="{StaticResource CaptionTextBlockStyle}" Foreground="{ThemeResource TextFillColorTertiaryBrush}" HorizontalAlignment="Center" />
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+
+                        <!-- Conformed Output Status Tag -->
+                        <Grid Grid.Row="2" ColumnDefinitions="*,Auto">
+                            <TextBlock Text="{x:Bind ViewModel.StatusMessage, Mode=OneWay}"
+                                       Style="{StaticResource CaptionTextBlockStyle}"
+                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                       VerticalAlignment="Center"
+                                       TextTrimming="CharacterEllipsis" />
+                            
+                            <Border Grid.Column="1" Background="{ThemeResource SystemFillColorSuccessBackgroundBrush}"
+                                    CornerRadius="4" Padding="8,2"
+                                    Visibility="{x:Bind ViewModel.HasConformedImage, Mode=OneWay, Converter={StaticResource BoolToVis}}">
+                                <TextBlock Text="Upload-Ready ✓" FontSize="11" Foreground="{ThemeResource SystemFillColorSuccessBrush}" FontWeight="Bold" />
+                            </Border>
+                        </Grid>
+                    </Grid>
+                </Border>
+            </Grid>
+
             <!-- Instructions Notice -->
             <InfoBar IsOpen="True" IsClosable="False" Severity="Informational"
                      Title="Authority Requirement Note"
                      Message="{x:Bind ViewModel.SelectedPreset.AdditionalInstructions, Mode=OneWay}" />
 
-            <!-- Active Document & Compliance Card -->
+            <!-- Action Controls Bar -->
             <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                     BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                     BorderThickness="1"
                     CornerRadius="8"
-                    Padding="20">
-                <StackPanel Spacing="16">
-                    <StackPanel Orientation="Horizontal" Spacing="12">
-                        <FontIcon Glyph="&#xE8B7;" FontSize="24" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
-                        <StackPanel>
-                            <TextBlock Text="{x:Bind ViewModel.InputFileName, Mode=OneWay, FallbackValue='No document loaded'}" 
-                                       Style="{StaticResource SubtitleTextBlockStyle}" FontWeight="SemiBold" />
-                            <TextBlock Text="{x:Bind ViewModel.InputFilePath, Mode=OneWay, FallbackValue='Select or drop an exam document to inspect and format'}" 
-                                       Style="{StaticResource CaptionTextBlockStyle}" Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
-                        </StackPanel>
-                    </StackPanel>
-
-                    <!-- Status Banner -->
+                    Padding="16">
+                <Grid ColumnDefinitions="*,Auto">
                     <TextBlock Text="{x:Bind ViewModel.StatusMessage, Mode=OneWay}" 
-                               Style="{StaticResource BodyStrongTextBlockStyle}" />
+                               Style="{StaticResource BodyStrongTextBlockStyle}"
+                               VerticalAlignment="Center" />
 
                     <!-- Action Controls -->
-                    <StackPanel Orientation="Horizontal" Spacing="12">
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="12">
                         <Button Content="Auto-Conform to Preset" 
                                 Command="{x:Bind ViewModel.AutoConformCommand}"
-                                Style="{StaticResource AccentButtonStyle}" />
+                                Style="{StaticResource AccentButtonStyle}"
+                                IsEnabled="{x:Bind ViewModel.HasSourceImage, Mode=OneWay}" />
                         <Button Content="Re-Validate" 
-                                Command="{x:Bind ViewModel.ValidateCurrentFileCommand}" />
+                                Command="{x:Bind ViewModel.ValidateCurrentFileCommand}"
+                                IsEnabled="{x:Bind ViewModel.HasSourceImage, Mode=OneWay}" />
                         <Button Content="Export &amp; Save" 
-                                Click="OnExportClicked" />
+                                Click="OnExportClicked"
+                                IsEnabled="{x:Bind ViewModel.HasConformedImage, Mode=OneWay}" />
                     </StackPanel>
-                </StackPanel>
+                </Grid>
             </Border>
 
         </StackPanel>

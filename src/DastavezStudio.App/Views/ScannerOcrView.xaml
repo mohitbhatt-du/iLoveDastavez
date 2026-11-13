@@ -17,12 +17,12 @@
     </Page.Resources>
 
     <ScrollViewer VerticalScrollBarVisibility="Auto">
-        <StackPanel Spacing="20" Padding="32,24,32,32" MaxWidth="1100" HorizontalAlignment="Left">
+        <StackPanel Spacing="20" Padding="32,24,32,32" MaxWidth="1140" HorizontalAlignment="Left">
             
             <!-- Page Header -->
             <StackPanel Spacing="4">
                 <TextBlock Text="Document Scanner &amp; Offline OCR" Style="{StaticResource TitleTextBlockStyle}" FontWeight="Bold" />
-                <TextBlock Text="Straighten tilted scans, remove mobile phone shadows, normalize certificates, and extract text into searchable PDFs offline." 
+                <TextBlock Text="Straighten tilted scans, remove mobile phone shadows, normalize certificates, and extract text into searchable PDFs offline with live preview." 
                            Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
             </StackPanel>
 
@@ -66,71 +66,162 @@
                 </StackPanel>
             </Border>
 
-            <!-- Document Selection & Action Card -->
+            <!-- Selection Bar -->
             <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                     BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                     BorderThickness="1"
                     CornerRadius="8"
-                    Padding="20">
-                <StackPanel Spacing="16">
-                    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="16" VerticalAlignment="Center">
-                        <FontIcon Glyph="&#xE8E5;" FontSize="28" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                    Padding="16">
+                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="16" VerticalAlignment="Center">
+                    <FontIcon Glyph="&#xE8E5;" FontSize="28" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
 
-                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                            <TextBlock Text="{x:Bind ViewModel.InputFileName, Mode=OneWay, FallbackValue='No document selected'}" 
-                                       Style="{StaticResource SubtitleTextBlockStyle}" FontWeight="SemiBold" />
-                            <TextBlock Text="{x:Bind ViewModel.InputFilePath, Mode=OneWay, FallbackValue='Select a certificate, mark sheet, ID card or document image'}" 
-                                       Style="{StaticResource CaptionTextBlockStyle}" Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
-                        </StackPanel>
-
-                        <Button Grid.Column="2" Click="OnSelectFileClicked" Style="{StaticResource AccentButtonStyle}"
-                                IsEnabled="{x:Bind ViewModel.IsProcessing, Mode=OneWay, Converter={StaticResource InvBool}}">
-                            <StackPanel Orientation="Horizontal" Spacing="8">
-                                <FontIcon Glyph="&#xE8E5;" FontSize="16" />
-                                <TextBlock Text="Select Document..." />
-                            </StackPanel>
-                        </Button>
-                    </Grid>
-
-                    <!-- Progress Bar -->
-                    <StackPanel Spacing="6" Visibility="{x:Bind ViewModel.IsProcessing, Mode=OneWay, Converter={StaticResource BoolToVis}}">
-                        <ProgressBar Value="{x:Bind ViewModel.Progress, Mode=OneWay}" Maximum="100" />
+                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                        <TextBlock Text="{x:Bind ViewModel.InputFileName, Mode=OneWay, FallbackValue='No document selected'}" 
+                                   Style="{StaticResource SubtitleTextBlockStyle}" FontWeight="SemiBold" />
+                        <TextBlock Text="{x:Bind ViewModel.InputFilePath, Mode=OneWay, FallbackValue='Select a certificate, mark sheet, ID card or document image'}" 
+                                   Style="{StaticResource CaptionTextBlockStyle}" Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
                     </StackPanel>
 
-                    <!-- Status Text -->
-                    <TextBlock Text="{x:Bind ViewModel.StatusMessage, Mode=OneWay}" Style="{StaticResource BodyStrongTextBlockStyle}" />
+                    <Button Grid.Column="2" Click="OnSelectFileClicked" Style="{StaticResource AccentButtonStyle}"
+                            IsEnabled="{x:Bind ViewModel.IsProcessing, Mode=OneWay, Converter={StaticResource InvBool}}">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <FontIcon Glyph="&#xE8E5;" FontSize="16" />
+                            <TextBlock Text="Select Document..." />
+                        </StackPanel>
+                    </Button>
+                </Grid>
+            </Border>
 
-                    <!-- Result Details InfoBar -->
-                    <InfoBar IsOpen="{x:Bind ViewModel.HasCleanedFile, Mode=OneWay}"
-                             IsClosable="False"
-                             Severity="Success"
-                             Title="Document Processed"
-                             Message="{x:Bind ViewModel.ResultDetails, Mode=OneWay}">
-                        <InfoBar.ActionButton>
-                            <Button Content="Save Clean Document..." Click="OnExportCleanedClicked" />
-                        </InfoBar.ActionButton>
-                    </InfoBar>
+            <!-- LIVE PREVIEW CONTAINER (ORIGINAL SCANNED vs CLEANED RESULT) -->
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="20">
+                <!-- Source Document Preview -->
+                <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                        BorderThickness="1"
+                        CornerRadius="8"
+                        Padding="16">
+                    <Grid RowDefinitions="Auto,*,Auto" RowSpacing="12">
+                        <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                            <FontIcon Glyph="&#xEB9F;" FontSize="16" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                            <TextBlock Text="Original Scanned Document" Style="{StaticResource BodyStrongTextBlockStyle}" />
+                        </StackPanel>
+
+                        <Border Grid.Row="1" Height="280"
+                                Background="{ThemeResource LayerFillColorAltBrush}"
+                                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                BorderThickness="1"
+                                CornerRadius="6"
+                                Padding="8">
+                            <Grid>
+                                <Image Source="{x:Bind ViewModel.SourceImage, Mode=OneWay}"
+                                       Stretch="Uniform"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center"
+                                       Visibility="{x:Bind ViewModel.HasSourceImage, Mode=OneWay, Converter={StaticResource BoolToVis}}" />
+
+                                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="8"
+                                            Visibility="{x:Bind ViewModel.HasSourceImage, Mode=OneWay, Converter={StaticResource InvBoolToVis}}">
+                                    <FontIcon Glyph="&#xE8E5;" FontSize="36" Foreground="{ThemeResource TextFillColorTertiaryBrush}" HorizontalAlignment="Center" />
+                                    <TextBlock Text="No document loaded" Style="{StaticResource BodyStrongTextBlockStyle}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" />
+                                    <TextBlock Text="Click Select Document above to preview" Style="{StaticResource CaptionTextBlockStyle}" Foreground="{ThemeResource TextFillColorTertiaryBrush}" HorizontalAlignment="Center" />
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+
+                        <TextBlock Grid.Row="2" Text="{x:Bind ViewModel.InputFileName, Mode=OneWay, FallbackValue='Awaiting document selection'}"
+                                   Style="{StaticResource CaptionTextBlockStyle}"
+                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                   TextTrimming="CharacterEllipsis" />
+                    </Grid>
+                </Border>
+
+                <!-- Cleaned Document Preview -->
+                <Border Grid.Column="1"
+                        Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                        BorderThickness="1"
+                        CornerRadius="8"
+                        Padding="16">
+                    <Grid RowDefinitions="Auto,*,Auto" RowSpacing="12">
+                        <Grid ColumnDefinitions="*,Auto" VerticalAlignment="Center">
+                            <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                                <FontIcon Glyph="&#xE73E;" FontSize="16" Foreground="{ThemeResource SystemFillColorSuccessBrush}" />
+                                <TextBlock Text="Cleaned &amp; Deskewed Output" Style="{StaticResource BodyStrongTextBlockStyle}" />
+                            </StackPanel>
+
+                            <Border Grid.Column="1" Background="{ThemeResource SystemFillColorSuccessBackgroundBrush}"
+                                    CornerRadius="4" Padding="6,2"
+                                    Visibility="{x:Bind ViewModel.HasCleanedImage, Mode=OneWay, Converter={StaticResource BoolToVis}}">
+                                <TextBlock Text="Cleaned ✓" FontSize="11" Foreground="{ThemeResource SystemFillColorSuccessBrush}" FontWeight="SemiBold" />
+                            </Border>
+                        </Grid>
+
+                        <Border Grid.Row="1" Height="280"
+                                Background="{ThemeResource LayerFillColorAltBrush}"
+                                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                BorderThickness="1"
+                                CornerRadius="6"
+                                Padding="8">
+                            <Grid>
+                                <Image Source="{x:Bind ViewModel.CleanedImage, Mode=OneWay}"
+                                       Stretch="Uniform"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center"
+                                       Visibility="{x:Bind ViewModel.HasCleanedImage, Mode=OneWay, Converter={StaticResource BoolToVis}}" />
+
+                                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="8"
+                                            Visibility="{x:Bind ViewModel.HasCleanedImage, Mode=OneWay, Converter={StaticResource InvBoolToVis}}">
+                                    <FontIcon Glyph="&#xE892;" FontSize="36" Foreground="{ThemeResource TextFillColorTertiaryBrush}" HorizontalAlignment="Center" />
+                                    <TextBlock Text="Cleaned Document Preview" Style="{StaticResource BodyStrongTextBlockStyle}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" />
+                                    <TextBlock Text="Click Clean Document below to remove shadows &amp; deskew" Style="{StaticResource CaptionTextBlockStyle}" Foreground="{ThemeResource TextFillColorTertiaryBrush}" HorizontalAlignment="Center" />
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+
+                        <TextBlock Grid.Row="2" Text="{x:Bind ViewModel.ResultDetails, Mode=OneWay, FallbackValue='Awaiting document processing'}"
+                                   Style="{StaticResource CaptionTextBlockStyle}"
+                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                   TextTrimming="CharacterEllipsis" />
+                    </Grid>
+                </Border>
+            </Grid>
+
+            <!-- Progress Bar -->
+            <StackPanel Spacing="6" Visibility="{x:Bind ViewModel.IsProcessing, Mode=OneWay, Converter={StaticResource BoolToVis}}">
+                <ProgressBar Value="{x:Bind ViewModel.Progress, Mode=OneWay}" Maximum="100" />
+            </StackPanel>
+
+            <!-- Action Controls Bar -->
+            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                    BorderThickness="1"
+                    CornerRadius="8"
+                    Padding="16">
+                <Grid ColumnDefinitions="*,Auto">
+                    <TextBlock Text="{x:Bind ViewModel.StatusMessage, Mode=OneWay}" 
+                               Style="{StaticResource BodyStrongTextBlockStyle}"
+                               VerticalAlignment="Center" />
 
                     <!-- Primary Actions -->
-                    <StackPanel Orientation="Horizontal" Spacing="12">
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="12">
                         <Button Content="Clean Document (Deskew &amp; Shadows)"
                                 Command="{x:Bind ViewModel.CleanDocumentCommand}"
                                 Style="{StaticResource AccentButtonStyle}"
-                                IsEnabled="{x:Bind ViewModel.HasInputFile, Mode=OneWay}" />
+                                IsEnabled="{x:Bind ViewModel.HasSourceImage, Mode=OneWay}" />
 
                         <Button Content="Extract Text (OCR)"
                                 Command="{x:Bind ViewModel.ExtractTextCommand}"
-                                IsEnabled="{x:Bind ViewModel.HasInputFile, Mode=OneWay}" />
+                                IsEnabled="{x:Bind ViewModel.HasSourceImage, Mode=OneWay}" />
 
                         <Button Content="Create Searchable PDF"
                                 Command="{x:Bind ViewModel.CreateSearchablePdfCommand}"
-                                IsEnabled="{x:Bind ViewModel.HasInputFile, Mode=OneWay}" />
+                                IsEnabled="{x:Bind ViewModel.HasSourceImage, Mode=OneWay}" />
 
                         <Button Content="Save Searchable PDF..."
                                 Click="OnExportPdfClicked"
                                 IsEnabled="{x:Bind ViewModel.HasSearchablePdf, Mode=OneWay}" />
                     </StackPanel>
-                </StackPanel>
+                </Grid>
             </Border>
 
             <!-- OCR Text Results Area -->
@@ -162,7 +253,7 @@
 
                     <TextBox Text="{x:Bind ViewModel.ExtractedText, Mode=TwoWay}" 
                              AcceptsReturn="True" 
-                             Height="200" 
+                             Height="180" 
                              TextWrapping="Wrap" 
                              PlaceholderText="OCR extracted text will appear here. No document content is sent across any network." />
                 </StackPanel>

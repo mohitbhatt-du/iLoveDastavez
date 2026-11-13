@@ -1,8 +1,14 @@
+using System;
 using System.Diagnostics;
+using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using DastavezStudio.App.Helpers;
 using DastavezStudio.Core.Interfaces;
 using DastavezStudio.Core.Models;
+using Microsoft.UI.Xaml.Media.Imaging;
 
 namespace DastavezStudio.App.ViewModels;
 
@@ -25,6 +31,30 @@ public partial class AiEnhanceViewModel : ObservableObject
     public partial string? EnhancedFilePath { get; set; }
 
     public bool HasEnhancedFile => !string.IsNullOrEmpty(EnhancedFilePath) && File.Exists(EnhancedFilePath);
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasSourceImage))]
+    public partial BitmapImage? SourceImage { get; set; }
+
+    public bool HasSourceImage => SourceImage != null;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasEnhancedImage))]
+    public partial BitmapImage? EnhancedImage { get; set; }
+
+    public bool HasEnhancedImage => EnhancedImage != null;
+
+    [ObservableProperty]
+    public partial string OriginalDimensions { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial string OriginalFileSize { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial string EnhancedDimensions { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial string EnhancedFileSize { get; set; } = string.Empty;
 
     [ObservableProperty]
     public partial int SelectedUpscaleIndex { get; set; } = 0; // 0: 2x, 1: 4x
@@ -65,14 +95,25 @@ public partial class AiEnhanceViewModel : ObservableObject
         SelectedHardwareProvider = HardwareProviders.FirstOrDefault() ?? "CPU (Local Hardware)";
     }
 
-    public void SetInputFile(string filePath)
+    public void SetInputFile(string filePath) => _ = SetInputFileAsync(filePath);
+
+    public async Task SetInputFileAsync(string filePath)
     {
         if (!File.Exists(filePath)) return;
 
         InputFilePath = filePath;
         EnhancedFilePath = null;
+        EnhancedImage = null;
+        EnhancedDimensions = string.Empty;
+        EnhancedFileSize = string.Empty;
         ResultDetails = string.Empty;
         Progress = 0;
+
+        SourceImage = await ImagePreviewHelper.LoadBitmapFromFileAsync(filePath);
+
+        var sizeKb = new FileInfo(filePath).Length / 1024.0;
+        OriginalFileSize = sizeKb >= 1024 ? $"{sizeKb / 1024.0:F2} MB" : $"{sizeKb:F1} KB";
+
         StatusMessage = $"Loaded: {Path.GetFileName(filePath)}. Ready to enhance.";
     }
 
@@ -116,6 +157,15 @@ public partial class AiEnhanceViewModel : ObservableObject
         {
             var result = await _aiEnhancer.EnhanceAsync(InputFilePath, tempOutput, options, progressReporter, _cts.Token);
             EnhancedFilePath = result.OutputPath;
+            OriginalDimensions = $"{result.OriginalWidth} × {result.OriginalHeight} px";
+            EnhancedDimensions = $"{result.EnhancedWidth} × {result.EnhancedHeight} px";
+
+            var outSizeKb = new FileInfo(tempOutput).Length / 1024.0;
+            EnhancedFileSize = outSizeKb >= 1024 ? $"{outSizeKb / 1024.0:F2} MB" : $"{outSizeKb:F1} KB";
+
+            // Load enhanced image preview in-memory
+            EnhancedImage = await ImagePreviewHelper.LoadBitmapFromFileAsync(tempOutput);
+
             ResultDetails = $"Original: {result.OriginalWidth}×{result.OriginalHeight} px  ➔  Enhanced: {result.EnhancedWidth}×{result.EnhancedHeight} px ({result.MethodUsed}) in {result.Duration.TotalSeconds:F2}s";
             StatusMessage = "✓ Enhancement complete! Image is ready for export.";
             Progress = 100;

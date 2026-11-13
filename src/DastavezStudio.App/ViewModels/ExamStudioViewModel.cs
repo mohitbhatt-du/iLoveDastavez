@@ -1,8 +1,14 @@
+using System;
 using System.Collections.ObjectModel;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using DastavezStudio.App.Helpers;
 using DastavezStudio.Core.Interfaces;
 using DastavezStudio.Core.Models;
+using Microsoft.UI.Xaml.Media.Imaging;
 
 namespace DastavezStudio.App.ViewModels;
 
@@ -26,6 +32,33 @@ public partial class ExamStudioViewModel : ObservableObject
 
     [ObservableProperty]
     public partial string? ProcessedFilePath { get; set; }
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasSourceImage))]
+    public partial BitmapImage? SourceImage { get; set; }
+
+    public bool HasSourceImage => SourceImage != null;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasConformedImage))]
+    public partial BitmapImage? ConformedImage { get; set; }
+
+    public bool HasConformedImage => ConformedImage != null;
+
+    [ObservableProperty]
+    public partial string SourceDimensions { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial string SourceFileSize { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial string ConformedDimensions { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial string ConformedFileSize { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial string ConformedDpi { get; set; } = string.Empty;
 
     [ObservableProperty]
     public partial string StatusMessage { get; set; } = "Select an examination authority and document preset to begin.";
@@ -76,6 +109,7 @@ public partial class ExamStudioViewModel : ObservableObject
         if (value != null && !string.IsNullOrEmpty(InputFilePath))
         {
             await ValidateCurrentFileAsync();
+            await GenerateLivePreviewAsync();
         }
     }
 
@@ -97,10 +131,33 @@ public partial class ExamStudioViewModel : ObservableObject
 
     public async Task SetInputFileAsync(string path)
     {
+        if (!File.Exists(path)) return;
+
         InputFilePath = path;
         InputFileName = Path.GetFileName(path);
         ProcessedFilePath = null;
+        ConformedImage = null;
+        ConformedDimensions = string.Empty;
+        ConformedFileSize = string.Empty;
+
+        // Load source image preview in-memory
+        SourceImage = await ImagePreviewHelper.LoadBitmapFromFileAsync(path);
+
+        try
+        {
+            var dims = await _imageProcessor.GetImageDimensionsAsync(path);
+            SourceDimensions = $"{dims.Width} × {dims.Height} px";
+            var sizeKb = new FileInfo(path).Length / 1024.0;
+            SourceFileSize = sizeKb >= 1024 ? $"{sizeKb / 1024.0:F2} MB" : $"{sizeKb:F1} KB";
+        }
+        catch
+        {
+            SourceDimensions = "PDF Document";
+            SourceFileSize = $"{new FileInfo(path).Length / 1024.0:F1} KB";
+        }
+
         await ValidateCurrentFileAsync();
+        await GenerateLivePreviewAsync();
     }
 
     [RelayCommand]
@@ -135,7 +192,7 @@ public partial class ExamStudioViewModel : ObservableObject
         }
         catch
         {
-            // If PDF or non-image format
+            // PDF or non-image format
         }
 
         if (Compliance.IsCompliant)
@@ -159,22 +216,51 @@ public partial class ExamStudioViewModel : ObservableObject
             return;
         }
 
-        IsProcessing = true;
-        StatusMessage = $"Processing document to match {SelectedPreset.Authority} ({SelectedPreset.DocumentType}) specs...";
+        await GenerateLivePreviewAsync();
 
+        if (ProcessedFilePath != null)
+        {
+            StatusMessage = $"✓ Document successfully conformed to {SelectedPreset.Authority} {SelectedPreset.ExamName} ({Compliance?.ActualWidthPx}x{Compliance?.ActualHeightPx} px, {Compliance?.ActualSizeKb:F1} KB)! Ready to export.";
+        }
+    }
+
+    private async Task GenerateLivePreviewAsync()
+    {
+        if (string.IsNullOrEmpty(InputFilePath) || SelectedPreset == null || !File.Exists(InputFilePath))
+            return;
+
+        IsProcessing = true;
         try
         {
+            var ext = Path.GetExtension(InputFilePath).ToLowerInvariant();
+            if (ext == ".pdf")
+            {
+                // PDF handling
+                ProcessedFilePath = InputFilePath;
+                ConformedImage = SourceImage;
+                ConformedDimensions = "PDF Document";
+                ConformedFileSize = SourceFileSize;
+                return;
+            }
+
             var tempOut = _tempFileManager.GetTempFilePath(".jpg");
             await _imageProcessor.ProcessForExamPresetAsync(InputFilePath, tempOut, SelectedPreset);
             ProcessedFilePath = tempOut;
 
-            await ValidateCurrentFileAsync();
+            // Load conformed image preview in-memory
+            ConformedImage = await ImagePreviewHelper.LoadBitmapFromFileAsync(tempOut);
 
-            StatusMessage = $"✓ Document successfully conformed to {SelectedPreset.Authority} {SelectedPreset.ExamName} ({Compliance?.ActualWidthPx}x{Compliance?.ActualHeightPx} px, {Compliance?.ActualSizeKb:F1} KB)!";
+            var outDims = await _imageProcessor.GetImageDimensionsAsync(tempOut);
+            ConformedDimensions = $"{outDims.Width} × {outDims.Height} px";
+            var outSizeKb = new FileInfo(tempOut).Length / 1024.0;
+            ConformedFileSize = $"{outSizeKb:F1} KB";
+            ConformedDpi = $"{outDims.DpiX} DPI";
+
+            await ValidateCurrentFileAsync();
         }
         catch (Exception ex)
         {
-            StatusMessage = $"Error processing document: {ex.Message}";
+            StatusMessage = $"Preview error: {ex.Message}";
         }
         finally
         {
