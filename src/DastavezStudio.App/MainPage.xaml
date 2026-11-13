@@ -18,7 +18,7 @@
             
             <NavigationView.PaneHeader>
                 <StackPanel Orientation="Horizontal" Spacing="12" Margin="14,12,14,12" VerticalAlignment="Center">
-                    <Image Source="Assets/AppLogo_Small.png" Width="30" Height="30" VerticalAlignment="Center" />
+                    <Image x:Name="NavHeaderLogo" Width="30" Height="30" VerticalAlignment="Center" />
                     <StackPanel VerticalAlignment="Center">
                         <TextBlock Text="iLoveDastavez" Style="{StaticResource BodyStrongTextBlockStyle}" FontSize="14" FontWeight="Bold" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
                         <TextBlock Text="Dastavez Studio" Style="{StaticResource CaptionTextBlockStyle}" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />

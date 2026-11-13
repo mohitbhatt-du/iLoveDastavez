@@ -7,7 +7,7 @@ public partial class AboutViewModel : ObservableObject
     public string AppName => "Dastavez Studio";
     public string Publisher => "iLoveDastavez";
     public string Tagline => "हर दस्तावेज़, तैयार!";
-    public string Version => "v1.0.0 (LTS Release)";
+    public string Version => "v1.0.2 (LTS Release)";
     public string Platform => ".NET 10.0 • WinUI 3 • Windows App SDK";
 
     public string PrivacyPolicySummary =>

@@ -2,7 +2,7 @@
 ; Production-grade offline Windows installer
 
 #define MyAppName "Dastavez Studio"
-#define MyAppVersion "1.0.0"
+#define MyAppVersion "1.0.2"
 #define MyAppPublisher "iLoveDastavez"
 #define MyAppURL "https://github.com/mohitbhatt-du/iLoveDastavez"
 #define MyAppExeName "DastavezStudio.App.exe"

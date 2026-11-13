@@ -9,7 +9,7 @@ using Microsoft.UI.Xaml.Media.Imaging;
 namespace DastavezStudio.App.Helpers;
 
 /// <summary>
-/// Thread-safe, ephemeral memory image preview helper.
+/// Thread-safe, ephemeral memory image and PDF preview helper.
 /// Loads images and renders PDF page previews in-memory with zero disk file retention or locking.
 /// </summary>
 public static class ImagePreviewHelper
@@ -25,7 +25,7 @@ public static class ImagePreviewHelper
         {
             if (ext == ".pdf")
             {
-                return await RenderPdfFirstPageAsync(filePath);
+                return await RenderPdfPageAsync(filePath, 0);
             }
 
             // Read file bytes into memory and transfer to RandomAccessStream to avoid file locking
@@ -62,15 +62,20 @@ public static class ImagePreviewHelper
         }
     }
 
-    public static async Task<BitmapImage?> RenderPdfFirstPageAsync(string pdfPath)
+    public static async Task<BitmapImage?> RenderPdfPageAsync(string pdfPath, uint pageIndex = 0)
     {
+        if (string.IsNullOrEmpty(pdfPath) || !File.Exists(pdfPath))
+            return null;
+
         try
         {
             var storageFile = await StorageFile.GetFileFromPathAsync(pdfPath);
             var pdfDoc = await PdfDocument.LoadFromFileAsync(storageFile);
             if (pdfDoc.PageCount == 0) return null;
 
-            using var page = pdfDoc.GetPage(0);
+            if (pageIndex >= pdfDoc.PageCount) pageIndex = 0;
+
+            using var page = pdfDoc.GetPage(pageIndex);
             var stream = new InMemoryRandomAccessStream();
             await page.RenderToStreamAsync(stream);
 
@@ -81,6 +86,23 @@ public static class ImagePreviewHelper
         catch
         {
             return null;
+        }
+    }
+
+    public static async Task<uint> GetPdfPageCountAsync(string pdfPath)
+    {
+        if (string.IsNullOrEmpty(pdfPath) || !File.Exists(pdfPath))
+            return 0;
+
+        try
+        {
+            var storageFile = await StorageFile.GetFileFromPathAsync(pdfPath);
+            var pdfDoc = await PdfDocument.LoadFromFileAsync(storageFile);
+            return pdfDoc.PageCount;
+        }
+        catch
+        {
+            return 0;
         }
     }
 }

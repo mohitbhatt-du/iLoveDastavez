@@ -5,15 +5,21 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="using:DastavezStudio.App.Views"
+    xmlns:conv="using:DastavezStudio.App.Converters"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
 
+    <Page.Resources>
+        <conv:BoolToVisibilityConverter x:Key="BoolToVis" />
+        <conv:InverseBoolToVisibilityConverter x:Key="InvBoolToVis" />
+    </Page.Resources>
+
     <ScrollViewer VerticalScrollBarVisibility="Auto">
-        <StackPanel Spacing="20" Padding="32,24,32,32" MaxWidth="1100" HorizontalAlignment="Left">
+        <StackPanel Spacing="20" Padding="32,24,32,32" MaxWidth="1140" HorizontalAlignment="Left">
             
             <StackPanel Spacing="4">
                 <TextBlock Text="PDF Toolkit" Style="{StaticResource TitleTextBlockStyle}" FontWeight="Bold" />
-                <TextBlock Text="Compress, merge, split, reorder, convert, and secure PDF documents completely offline." 
+                <TextBlock Text="Compress, inspect, merge, and format PDF documents with multi-page interactive live preview." 
                            Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
             </StackPanel>
 
@@ -60,20 +66,156 @@
                             </ComboBox>
                         </StackPanel>
                     </Grid>
+                </StackPanel>
+            </Border>
 
-                    <StackPanel Orientation="Horizontal" Spacing="12" Margin="0,12,0,0">
+            <!-- LIVE PDF PREVIEW WORKBENCH (SIDE-BY-SIDE: SOURCE PDF vs COMPRESSED PDF) -->
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="20">
+                <!-- Source PDF Document Preview -->
+                <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                        BorderThickness="1"
+                        CornerRadius="8"
+                        Padding="16">
+                    <Grid RowDefinitions="Auto,*,Auto" RowSpacing="12">
+                        <!-- Card Header with Page Navigation -->
+                        <Grid ColumnDefinitions="*,Auto" VerticalAlignment="Center">
+                            <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                                <FontIcon Glyph="&#xE8B7;" FontSize="16" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                <TextBlock Text="Source PDF Document" Style="{StaticResource BodyStrongTextBlockStyle}" />
+                            </StackPanel>
+
+                            <!-- Page Navigation Controls -->
+                            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6" Visibility="{x:Bind ViewModel.HasSourcePdfPreview, Mode=OneWay, Converter={StaticResource BoolToVis}}">
+                                <Button Content="◀" Command="{x:Bind ViewModel.PreviousPageCommand}" Padding="6,2" ToolTipService.ToolTip="Previous Page" />
+                                <Border Background="{ThemeResource LayerFillColorDefaultBrush}" CornerRadius="4" Padding="6,2" VerticalAlignment="Center">
+                                    <TextBlock Text="{x:Bind ViewModel.CurrentPageDisplay, Mode=OneWay}" Style="{StaticResource CaptionTextBlockStyle}" FontWeight="SemiBold" />
+                                </Border>
+                                <Button Content="▶" Command="{x:Bind ViewModel.NextPageCommand}" Padding="6,2" ToolTipService.ToolTip="Next Page" />
+                                <Border Background="{ThemeResource LayerFillColorDefaultBrush}" CornerRadius="4" Padding="6,2" VerticalAlignment="Center">
+                                    <TextBlock Text="{x:Bind ViewModel.OriginalFileSize, Mode=OneWay}" Style="{StaticResource CaptionTextBlockStyle}" />
+                                </Border>
+                            </StackPanel>
+                        </Grid>
+
+                        <!-- PDF Page Preview Canvas -->
+                        <Border Grid.Row="1" Height="320"
+                                Background="{ThemeResource LayerFillColorAltBrush}"
+                                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                BorderThickness="1"
+                                CornerRadius="6"
+                                Padding="8">
+                            <Grid>
+                                <Image Source="{x:Bind ViewModel.SourcePdfPreview, Mode=OneWay}"
+                                       Stretch="Uniform"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center"
+                                       Visibility="{x:Bind ViewModel.HasSourcePdfPreview, Mode=OneWay, Converter={StaticResource BoolToVis}}" />
+
+                                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="8"
+                                            Visibility="{x:Bind ViewModel.HasSourcePdfPreview, Mode=OneWay, Converter={StaticResource InvBoolToVis}}">
+                                    <FontIcon Glyph="&#xE8B7;" FontSize="36" Foreground="{ThemeResource TextFillColorTertiaryBrush}" HorizontalAlignment="Center" />
+                                    <TextBlock Text="No PDF loaded" Style="{StaticResource BodyStrongTextBlockStyle}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" />
+                                    <TextBlock Text="Click Select PDF File below to render live preview" Style="{StaticResource CaptionTextBlockStyle}" Foreground="{ThemeResource TextFillColorTertiaryBrush}" HorizontalAlignment="Center" />
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+
+                        <TextBlock Grid.Row="2" Text="{x:Bind ViewModel.InputFileName, Mode=OneWay, FallbackValue='Awaiting PDF selection'}"
+                                   Style="{StaticResource CaptionTextBlockStyle}"
+                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                   TextTrimming="CharacterEllipsis" />
+                    </Grid>
+                </Border>
+
+                <!-- Compressed PDF Document Preview -->
+                <Border Grid.Column="1"
+                        Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                        BorderThickness="1"
+                        CornerRadius="8"
+                        Padding="16">
+                    <Grid RowDefinitions="Auto,*,Auto" RowSpacing="12">
+                        <!-- Card Header -->
+                        <Grid ColumnDefinitions="*,Auto" VerticalAlignment="Center">
+                            <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                                <FontIcon Glyph="&#xE73E;" FontSize="16" Foreground="{ThemeResource SystemFillColorSuccessBrush}" />
+                                <TextBlock Text="Compressed Live Output" Style="{StaticResource BodyStrongTextBlockStyle}" />
+                            </StackPanel>
+
+                            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6" Visibility="{x:Bind ViewModel.HasProcessedPdfPreview, Mode=OneWay, Converter={StaticResource BoolToVis}}">
+                                <Border Background="{ThemeResource SystemFillColorSuccessBackgroundBrush}" CornerRadius="4" Padding="6,2" BorderBrush="{ThemeResource SystemFillColorSuccessBrush}" BorderThickness="1">
+                                    <TextBlock Text="{x:Bind ViewModel.ProcessedFileSize, Mode=OneWay}" Style="{StaticResource CaptionTextBlockStyle}" Foreground="{ThemeResource SystemFillColorSuccessBrush}" FontWeight="SemiBold" />
+                                </Border>
+                                <Border Background="{ThemeResource SystemFillColorSuccessBackgroundBrush}" CornerRadius="4" Padding="6,2">
+                                    <TextBlock Text="{x:Bind ViewModel.CompressionRatio, Mode=OneWay}" Style="{StaticResource CaptionTextBlockStyle}" Foreground="{ThemeResource SystemFillColorSuccessBrush}" FontWeight="Bold" />
+                                </Border>
+                            </StackPanel>
+                        </Grid>
+
+                        <!-- Processed Preview Canvas -->
+                        <Border Grid.Row="1" Height="320"
+                                Background="{ThemeResource LayerFillColorAltBrush}"
+                                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                BorderThickness="1"
+                                CornerRadius="6"
+                                Padding="8">
+                            <Grid>
+                                <Image Source="{x:Bind ViewModel.ProcessedPdfPreview, Mode=OneWay}"
+                                       Stretch="Uniform"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center"
+                                       Visibility="{x:Bind ViewModel.HasProcessedPdfPreview, Mode=OneWay, Converter={StaticResource BoolToVis}}" />
+
+                                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="8"
+                                            Visibility="{x:Bind ViewModel.HasProcessedPdfPreview, Mode=OneWay, Converter={StaticResource InvBoolToVis}}">
+                                    <FontIcon Glyph="&#xE790;" FontSize="36" Foreground="{ThemeResource TextFillColorTertiaryBrush}" HorizontalAlignment="Center" />
+                                    <TextBlock Text="Compressed PDF Preview" Style="{StaticResource BodyStrongTextBlockStyle}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" />
+                                    <TextBlock Text="Click Start Compression to generate and inspect output" Style="{StaticResource CaptionTextBlockStyle}" Foreground="{ThemeResource TextFillColorTertiaryBrush}" HorizontalAlignment="Center" />
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+
+                        <Grid Grid.Row="2" ColumnDefinitions="*,Auto">
+                            <TextBlock Text="{x:Bind ViewModel.StatusMessage, Mode=OneWay}"
+                                       Style="{StaticResource CaptionTextBlockStyle}"
+                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                       VerticalAlignment="Center"
+                                       TextTrimming="CharacterEllipsis" />
+                            
+                            <Border Grid.Column="1" Background="{ThemeResource SystemFillColorSuccessBackgroundBrush}"
+                                    CornerRadius="4" Padding="8,2"
+                                    Visibility="{x:Bind ViewModel.HasProcessedPdfPreview, Mode=OneWay, Converter={StaticResource BoolToVis}}">
+                                <TextBlock Text="Optimized ✓" FontSize="11" Foreground="{ThemeResource SystemFillColorSuccessBrush}" FontWeight="Bold" />
+                            </Border>
+                        </Grid>
+                    </Grid>
+                </Border>
+            </Grid>
+
+            <!-- Actions Bar -->
+            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                    BorderThickness="1"
+                    CornerRadius="8"
+                    Padding="16">
+                <Grid ColumnDefinitions="*,Auto">
+                    <TextBlock Text="{x:Bind ViewModel.StatusMessage, Mode=OneWay}" 
+                               Style="{StaticResource BodyStrongTextBlockStyle}"
+                               VerticalAlignment="Center" />
+
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="12">
                         <Button Content="Select PDF File..." 
                                 Click="OnSelectFileClicked" 
                                 Style="{StaticResource AccentButtonStyle}" />
                         <Button Content="Start Compression" 
-                                Command="{x:Bind ViewModel.CompressPdfCommand}" />
+                                Command="{x:Bind ViewModel.CompressPdfCommand}"
+                                IsEnabled="{x:Bind ViewModel.HasSourcePdfPreview, Mode=OneWay}" />
                         <Button Content="Export &amp; Save" 
-                                Click="OnExportClicked" />
+                                Click="OnExportClicked"
+                                IsEnabled="{x:Bind ViewModel.HasProcessedPdfPreview, Mode=OneWay}" />
                     </StackPanel>
-
-                    <TextBlock Text="{x:Bind ViewModel.StatusMessage, Mode=OneWay}" 
-                               Style="{StaticResource CaptionTextBlockStyle}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                </StackPanel>
+                </Grid>
             </Border>
 
         </StackPanel>

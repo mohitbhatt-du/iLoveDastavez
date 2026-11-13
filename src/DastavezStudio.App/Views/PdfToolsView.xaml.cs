@@ -1,6 +1,10 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Navigation;
 using Windows.Storage.Pickers;
 using WinRT.Interop;
 using DastavezStudio.App.ViewModels;
@@ -15,6 +19,15 @@ public sealed partial class PdfToolsView : Page
     {
         InitializeComponent();
         ViewModel = App.Services.GetRequiredService<PdfToolsViewModel>();
+    }
+
+    protected override async void OnNavigatedTo(NavigationEventArgs e)
+    {
+        base.OnNavigatedTo(e);
+        if (e.Parameter is string filePath && File.Exists(filePath))
+        {
+            await ViewModel.SetInputFileAsync(filePath);
+        }
     }
 
     private async void OnSelectFileClicked(object sender, RoutedEventArgs e)

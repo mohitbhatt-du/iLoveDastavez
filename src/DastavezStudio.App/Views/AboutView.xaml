@@ -17,7 +17,7 @@
                     CornerRadius="8"
                     Padding="24">
                 <Grid ColumnDefinitions="Auto,*" ColumnSpacing="20">
-                    <Image Source="Assets/AppLogo.png" Width="96" Height="96" Stretch="Uniform" VerticalAlignment="Center" />
+                    <Image x:Name="AboutLogo" Width="96" Height="96" Stretch="Uniform" VerticalAlignment="Center" />
                     <StackPanel Grid.Column="1" Spacing="8" VerticalAlignment="Center">
                         <TextBlock Text="iLoveDastavez — Dastavez Studio" Style="{StaticResource TitleTextBlockStyle}" FontWeight="Bold" />
                         <TextBlock Text="{x:Bind ViewModel.Tagline}" Style="{StaticResource SubtitleTextBlockStyle}" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />

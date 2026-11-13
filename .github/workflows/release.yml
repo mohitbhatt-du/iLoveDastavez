@@ -42,7 +42,10 @@ jobs:
         shell: pwsh
         run: |
           New-Item -ItemType Directory -Path artifacts/dist -Force
-          Compress-Archive -Path artifacts/publish/win-x64/* -DestinationPath artifacts/dist/DastavezStudio-v1.0.0-Portable-win-x64.zip -Force
+          $tag = "${{ github.ref_name }}"
+          if (-not $tag) { $tag = "v1.0.2" }
+          Compress-Archive -Path artifacts/publish/win-x64/* -DestinationPath "artifacts/dist/DastavezStudio-$tag-Portable-win-x64.zip" -Force
+          Copy-Item "artifacts/dist/DastavezStudio-$tag-Portable-win-x64.zip" "artifacts/dist/DastavezStudio-Portable-win-x64.zip" -Force
 
       - name: Install Inno Setup
         shell: pwsh
@@ -70,6 +73,6 @@ jobs:
         with:
           files: |
             artifacts/dist/DastavezStudio-Setup.exe
-            artifacts/dist/DastavezStudio-v1.0.0-Portable-win-x64.zip
+            artifacts/dist/DastavezStudio-*-Portable-win-x64.zip
             artifacts/dist/SHA256SUMS.txt
           generate_release_notes: true

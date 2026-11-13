@@ -19,13 +19,13 @@
                     CornerRadius="12"
                     Padding="28">
                 <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="20">
-                    <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                    <Border Background="{ThemeResource LayerFillColorDefaultBrush}"
                             BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                             BorderThickness="1"
-                            CornerRadius="14"
-                            Padding="6"
+                            CornerRadius="16"
+                            Padding="4"
                             VerticalAlignment="Center">
-                        <Image Source="Assets/AppLogo.png" Width="80" Height="80" Stretch="Uniform" />
+                        <Image x:Name="HeroLogo" Width="84" Height="84" Stretch="Uniform" />
                     </Border>
 
                     <StackPanel Grid.Column="1" Spacing="8" VerticalAlignment="Center">
@@ -65,9 +65,15 @@
             </Border>
 
             <!-- Quick Action Cards Section -->
-            <TextBlock Text="Quick Actions" Style="{StaticResource SubtitleTextBlockStyle}" FontWeight="SemiBold" />
+            <StackPanel Spacing="4">
+                <TextBlock Text="Quick Actions" Style="{StaticResource SubtitleTextBlockStyle}" FontWeight="SemiBold" />
+                <TextBlock Text="Select a studio tool to jump right in:" Style="{StaticResource CaptionTextBlockStyle}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+            </StackPanel>
 
-            <GridView ItemsSource="{x:Bind ViewModel.QuickActions}" SelectionMode="None">
+            <GridView ItemsSource="{x:Bind ViewModel.QuickActions}"
+                      IsItemClickEnabled="True"
+                      ItemClick="OnQuickActionItemClick"
+                      SelectionMode="None">
                 <GridView.ItemTemplate>
                     <DataTemplate x:DataType="vm:QuickActionItem">
                         <Border Width="310" Height="140"
@@ -78,10 +84,13 @@
                                 Padding="16"
                                 Margin="0,0,12,12">
                             <Grid RowDefinitions="Auto,*">
-                                <StackPanel Orientation="Horizontal" Spacing="10">
-                                    <FontIcon Glyph="{x:Bind Glyph}" FontSize="22" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
-                                    <TextBlock Text="{x:Bind Title}" Style="{StaticResource BodyStrongTextBlockStyle}" VerticalAlignment="Center" />
-                                </StackPanel>
+                                <Grid ColumnDefinitions="*,Auto">
+                                    <StackPanel Orientation="Horizontal" Spacing="10">
+                                        <FontIcon Glyph="{x:Bind Glyph}" FontSize="22" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                        <TextBlock Text="{x:Bind Title}" Style="{StaticResource BodyStrongTextBlockStyle}" VerticalAlignment="Center" />
+                                    </StackPanel>
+                                    <FontIcon Grid.Column="1" Glyph="&#xE76C;" FontSize="12" Foreground="{ThemeResource TextFillColorTertiaryBrush}" VerticalAlignment="Center" />
+                                </Grid>
                                 <TextBlock Grid.Row="1" Text="{x:Bind Description}" 
                                            Style="{StaticResource CaptionTextBlockStyle}" 
                                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
@@ -96,18 +105,24 @@
             <!-- Drag and Drop Dropzone -->
             <TextBlock Text="Quick File Drop" Style="{StaticResource SubtitleTextBlockStyle}" FontWeight="SemiBold" />
             
-            <Border Background="{ThemeResource LayerFillColorDefaultBrush}"
+            <Border x:Name="DropZone"
+                    AllowDrop="True"
+                    DragOver="OnDropZoneDragOver"
+                    DragLeave="OnDropZoneDragLeave"
+                    Drop="OnDropZoneDrop"
+                    PointerPressed="OnDropZoneClicked"
+                    Background="{ThemeResource LayerFillColorDefaultBrush}"
                     BorderBrush="{ThemeResource AccentFillColorDefaultBrush}"
                     BorderThickness="2"
                     CornerRadius="10"
                     Padding="40"
                     HorizontalAlignment="Stretch">
                 <StackPanel HorizontalAlignment="Center" Spacing="12">
-                    <FontIcon Glyph="&#xE898;" FontSize="40" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
-                    <TextBlock Text="Drag and drop documents or images here" 
+                    <FontIcon x:Name="DropZoneIcon" Glyph="&#xE898;" FontSize="40" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                    <TextBlock x:Name="DropZoneTitle" Text="Drag and drop documents or images here (or click to browse)" 
                                Style="{StaticResource BodyStrongTextBlockStyle}" 
                                HorizontalAlignment="Center" />
-                    <TextBlock Text="Supports PDF, JPEG, PNG, WEBP, BMP, and TIFF. Processed 100% locally on this machine." 
+                    <TextBlock Text="Supports PDF, JPEG, PNG, WEBP, BMP, and TIFF. Processed 100% locally with zero cloud uploads." 
                                Style="{StaticResource CaptionTextBlockStyle}" 
                                Foreground="{ThemeResource TextFillColorSecondaryBrush}" 
                                HorizontalAlignment="Center" />
