@@ -31,17 +31,15 @@ class Program
 
         // 4. Multi-Resolution ICO (16, 32, 48, 64, 128, 256)
         int[] icoSizes = { 16, 32, 48, 64, 128, 256 };
-        var pngStreams = new byte[icoSizes.Length][];
+        var icoStreams = new byte[icoSizes.Length][];
         for (int i = 0; i < icoSizes.Length; i++)
         {
             using var bmp = RenderAestheticLogo(icoSizes[i]);
-            using var img = SKImage.FromBitmap(bmp);
-            using var data = img.Encode(SKEncodedImageFormat.Png, 100);
-            pngStreams[i] = data.ToArray();
+            icoStreams[i] = CreateIcoEntryData(bmp, icoSizes[i]);
         }
 
         var icoPath = Path.Combine(assetsDir, "AppIcon.ico");
-        SaveMultiResIco(icoSizes, pngStreams, icoPath);
+        SaveMultiResIco(icoSizes, icoStreams, icoPath);
         Console.WriteLine($"Saved: {icoPath}");
 
         // 5. Horizontal Banner
@@ -354,7 +352,79 @@ class Program
         data.SaveTo(stream);
     }
 
-    static void SaveMultiResIco(int[] sizes, byte[][] pngData, string outputPath)
+    static byte[] CreateIcoEntryData(SKBitmap bitmap, int size)
+    {
+        if (size >= 256)
+        {
+            // Windows Vista+ supports PNG compression for 256x256
+            using var img = SKImage.FromBitmap(bitmap);
+            using var data = img.Encode(SKEncodedImageFormat.Png, 100);
+            return data.ToArray();
+        }
+
+        // Standard Windows DIB format for 16, 32, 48, 64, 128
+        using var ms = new MemoryStream();
+        using var bw = new BinaryWriter(ms);
+
+        int width = size;
+        int height = size;
+        int andRowBytes = ((width + 31) / 32) * 4;
+        int andMaskSize = andRowBytes * height;
+        int pixelDataSize = width * height * 4;
+
+        // BITMAPINFOHEADER (40 bytes)
+        bw.Write((uint)40); // biSize
+        bw.Write((int)width); // biWidth
+        bw.Write((int)(height * 2)); // biHeight (XOR height + AND height)
+        bw.Write((ushort)1); // biPlanes
+        bw.Write((ushort)32); // biBitCount
+        bw.Write((uint)0); // biCompression (BI_RGB)
+        bw.Write((uint)pixelDataSize); // biSizeImage
+        bw.Write((int)0); // biXPelsPerMeter
+        bw.Write((int)0); // biYPelsPerMeter
+        bw.Write((uint)0); // biClrUsed
+        bw.Write((uint)0); // biClrImportant
+
+        // XOR Mask: 32-bit BGRA pixels from bottom row to top row
+        for (int y = height - 1; y >= 0; y--)
+        {
+            for (int x = 0; x < width; x++)
+            {
+                var color = bitmap.GetPixel(x, y);
+                bw.Write((byte)color.Blue);
+                bw.Write((byte)color.Green);
+                bw.Write((byte)color.Red);
+                bw.Write((byte)color.Alpha);
+            }
+        }
+
+        // AND Mask: 1-bit per pixel (0 = opaque/alpha, 1 = transparent mask)
+        for (int y = height - 1; y >= 0; y--)
+        {
+            for (int x = 0; x < andRowBytes; x++)
+            {
+                byte maskByte = 0;
+                for (int bit = 0; bit < 8; bit++)
+                {
+                    int px = x * 8 + bit;
+                    if (px < width)
+                    {
+                        var color = bitmap.GetPixel(px, y);
+                        if (color.Alpha == 0)
+                        {
+                            maskByte |= (byte)(0x80 >> bit);
+                        }
+                    }
+                }
+                bw.Write(maskByte);
+            }
+        }
+
+        bw.Flush();
+        return ms.ToArray();
+    }
+
+    static void SaveMultiResIco(int[] sizes, byte[][] entryData, string outputPath)
     {
         using var stream = new FileStream(outputPath, FileMode.Create, FileAccess.Write);
         using var writer = new BinaryWriter(stream);
@@ -375,15 +445,15 @@ class Program
             writer.Write((byte)0);
             writer.Write((ushort)1);
             writer.Write((ushort)32);
-            writer.Write((uint)pngData[i].Length);
+            writer.Write((uint)entryData[i].Length);
             writer.Write((uint)currentOffset);
 
-            currentOffset += pngData[i].Length;
+            currentOffset += entryData[i].Length;
         }
 
         for (int i = 0; i < sizes.Length; i++)
         {
-            writer.Write(pngData[i]);
+            writer.Write(entryData[i]);
         }
     }
 }

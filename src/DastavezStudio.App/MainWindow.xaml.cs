@@ -30,4 +30,12 @@ public sealed partial class MainWindow : Window
         // Navigate the root frame to the main page on startup.
         RootFrame.Navigate(typeof(MainPage));
     }
+
+    public void SetTheme(ElementTheme theme)
+    {
+        if (Content is FrameworkElement root)
+        {
+            root.RequestedTheme = theme;
+        }
+    }
 }

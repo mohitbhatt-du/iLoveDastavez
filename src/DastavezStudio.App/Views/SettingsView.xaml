@@ -5,32 +5,132 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="using:DastavezStudio.App.Views"
+    xmlns:conv="using:DastavezStudio.App.Converters"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
+
+    <Page.Resources>
+        <conv:BoolToVisibilityConverter x:Key="BoolToVis" />
+        <conv:InverseBoolToVisibilityConverter x:Key="InvBoolToVis" />
+    </Page.Resources>
 
     <ScrollViewer VerticalScrollBarVisibility="Auto">
         <StackPanel Spacing="20" Padding="32,24,32,32" MaxWidth="900" HorizontalAlignment="Left">
             
             <StackPanel Spacing="4">
                 <TextBlock Text="Settings &amp; Preferences" Style="{StaticResource TitleTextBlockStyle}" FontWeight="Bold" />
-                <TextBlock Text="Configure theme, default directories, DPI preferences, and security cleanup." 
+                <TextBlock Text="Configure appearance theme, seamless software updates, and privacy cache hygiene." 
                            Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
             </StackPanel>
 
-            <!-- Appearance -->
+            <!-- Appearance & Theme -->
             <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                     BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                     BorderThickness="1"
                     CornerRadius="8"
                     Padding="20">
                 <StackPanel Spacing="16">
-                    <TextBlock Text="Appearance &amp; Theme" Style="{StaticResource SubtitleTextBlockStyle}" FontWeight="SemiBold" />
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <FontIcon Glyph="&#xE790;" FontSize="18" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                        <TextBlock Text="Appearance &amp; Theme" Style="{StaticResource SubtitleTextBlockStyle}" FontWeight="SemiBold" />
+                    </StackPanel>
                     
-                    <RadioButtons Header="App Theme" SelectedIndex="0">
-                        <RadioButton Content="Follow Windows System Theme" />
-                        <RadioButton Content="Light Theme" />
-                        <RadioButton Content="Dark Theme" />
+                    <RadioButtons x:Name="ThemeSelector"
+                                  Header="App Theme"
+                                  SelectedIndex="{x:Bind ViewModel.ThemeIndex, Mode=TwoWay}"
+                                  SelectionChanged="OnThemeSelectionChanged">
+                        <RadioButton Content="Follow Windows System Theme (Default)" />
+                        <RadioButton Content="Light Theme (White &amp; Soft Gray)" />
+                        <RadioButton Content="Dark Theme (Obsidian &amp; Fluent Dark)" />
                     </RadioButtons>
+
+                    <StackPanel Orientation="Horizontal" Spacing="10">
+                        <Button Click="OnSystemThemeClicked">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <FontIcon Glyph="&#xE770;" />
+                                <TextBlock Text="System Theme" />
+                            </StackPanel>
+                        </Button>
+                        <Button Click="OnLightThemeClicked">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <FontIcon Glyph="&#xE706;" />
+                                <TextBlock Text="Light Theme" />
+                            </StackPanel>
+                        </Button>
+                        <Button Click="OnDarkThemeClicked">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <FontIcon Glyph="&#xE708;" />
+                                <TextBlock Text="Dark Theme" />
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+
+                    <TextBlock Text="{x:Bind ViewModel.ThemeStatusMessage, Mode=OneWay}" 
+                               Style="{StaticResource CaptionTextBlockStyle}" 
+                               Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                </StackPanel>
+            </Border>
+
+            <!-- Software Updates & Seamless Upgrade -->
+            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                    BorderThickness="1"
+                    CornerRadius="8"
+                    Padding="20">
+                <StackPanel Spacing="16">
+                    <Grid ColumnDefinitions="*,Auto">
+                        <StackPanel Spacing="4">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <FontIcon Glyph="&#xE895;" FontSize="18" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                <TextBlock Text="Software Updates &amp; Seamless Upgrade" Style="{StaticResource SubtitleTextBlockStyle}" FontWeight="SemiBold" />
+                            </StackPanel>
+                            <TextBlock Text="Direct update delivery from official GitHub repository releases." 
+                                       Style="{StaticResource CaptionTextBlockStyle}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                        </StackPanel>
+
+                        <Button Grid.Column="1" Command="{x:Bind ViewModel.CheckForUpdatesCommand}" Style="{StaticResource AccentButtonStyle}">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <ProgressRing IsActive="{x:Bind ViewModel.IsCheckingUpdates, Mode=OneWay}" Width="16" Height="16"
+                                              Visibility="{x:Bind ViewModel.IsCheckingUpdates, Mode=OneWay, Converter={StaticResource BoolToVis}}" />
+                                <FontIcon Glyph="&#xE72C;" Visibility="{x:Bind ViewModel.IsCheckingUpdates, Mode=OneWay, Converter={StaticResource InvBoolToVis}}" />
+                                <TextBlock Text="Check for Updates" />
+                            </StackPanel>
+                        </Button>
+                    </Grid>
+
+                    <Border Background="{ThemeResource LayerFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="6" Padding="12">
+                        <TextBlock Text="{x:Bind ViewModel.UpdateStatusMessage, Mode=OneWay}" Style="{StaticResource BodyStrongTextBlockStyle}" />
+                    </Border>
+
+                    <!-- Update Available Details & Download Section -->
+                    <StackPanel Spacing="12" Visibility="{x:Bind ViewModel.IsUpdateAvailable, Mode=OneWay, Converter={StaticResource BoolToVis}}">
+                        <Border Background="{ThemeResource LayerFillColorAltBrush}" CornerRadius="6" Padding="14">
+                            <StackPanel Spacing="8">
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <TextBlock Text="What's New in" Style="{StaticResource BodyStrongTextBlockStyle}" />
+                                    <TextBlock Text="{x:Bind ViewModel.LatestVersion, Mode=OneWay}" Style="{StaticResource BodyStrongTextBlockStyle}" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" FontWeight="Bold" />
+                                </StackPanel>
+                                <TextBlock Text="{x:Bind ViewModel.ReleaseNotes, Mode=OneWay}" Style="{StaticResource CaptionTextBlockStyle}" TextWrapping="Wrap" MaxHeight="120" />
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Download Progress Bar -->
+                        <StackPanel Spacing="6" Visibility="{x:Bind ViewModel.IsDownloadingUpdate, Mode=OneWay, Converter={StaticResource BoolToVis}}">
+                            <ProgressBar Value="{x:Bind ViewModel.DownloadPercent, Mode=OneWay}" Maximum="100" />
+                            <TextBlock Text="{x:Bind ViewModel.DownloadProgressText, Mode=OneWay}" Style="{StaticResource CaptionTextBlockStyle}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                        </StackPanel>
+
+                        <!-- Actions -->
+                        <StackPanel Orientation="Horizontal" Spacing="10">
+                            <Button Content="Download &amp; Install Update" Command="{x:Bind ViewModel.DownloadAndInstallUpdateCommand}"
+                                    Style="{StaticResource AccentButtonStyle}"
+                                    Visibility="{x:Bind ViewModel.CanInstallUpdate, Mode=OneWay, Converter={StaticResource InvBoolToVis}}" />
+                            
+                            <Button Content="Restart &amp; Apply Update Now" Command="{x:Bind ViewModel.LaunchDownloadedInstallerCommand}"
+                                    Style="{StaticResource AccentButtonStyle}"
+                                    Visibility="{x:Bind ViewModel.CanInstallUpdate, Mode=OneWay, Converter={StaticResource BoolToVis}}" />
+                        </StackPanel>
+                    </StackPanel>
                 </StackPanel>
             </Border>
 

@@ -41,6 +41,8 @@ public partial class App : Application
         services.AddSingleton<IAiEnhancer, AiEnhancer>();
         services.AddSingleton<IDocumentCleaner, DocumentCleaner>();
         services.AddSingleton<IOcrEngine, WindowsOcrEngine>();
+        services.AddSingleton<ISettingsService, SettingsService>();
+        services.AddSingleton<IUpdateService, UpdateService>();
 
         // ViewModels
         services.AddTransient<MainPageViewModel>();
@@ -57,10 +59,30 @@ public partial class App : Application
         Services = services.BuildServiceProvider();
     }
 
+    public static MainWindow MainWindow => (MainWindow)Window;
+
+    public static void SetTheme(ElementTheme theme)
+    {
+        if (Window?.Content is FrameworkElement root)
+        {
+            root.RequestedTheme = theme;
+        }
+    }
+
     protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
     {
         Window = new MainWindow();
         DispatcherQueue = Microsoft.UI.Dispatching.DispatcherQueue.GetForCurrentThread();
+
+        var settings = Services.GetRequiredService<ISettingsService>();
+        var theme = settings.Preferences.ThemeIndex switch
+        {
+            1 => ElementTheme.Light,
+            2 => ElementTheme.Dark,
+            _ => ElementTheme.Default
+        };
+        SetTheme(theme);
+
         Window.Activate();
     }
 }

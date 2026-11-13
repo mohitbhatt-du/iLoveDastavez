@@ -5,18 +5,25 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="using:DastavezStudio.App.Views"
+    xmlns:conv="using:DastavezStudio.App.Converters"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
+
+    <Page.Resources>
+        <conv:BoolToVisibilityConverter x:Key="BoolToVis" />
+        <conv:InverseBoolToVisibilityConverter x:Key="InvBoolToVis" />
+    </Page.Resources>
 
     <ScrollViewer VerticalScrollBarVisibility="Auto">
         <StackPanel Spacing="20" Padding="32,24,32,32" MaxWidth="900" HorizontalAlignment="Left">
             
+            <!-- App Banner Header -->
             <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                     BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                     BorderThickness="1"
                     CornerRadius="8"
                     Padding="24">
-                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="20">
+                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="20">
                     <Image x:Name="AboutLogo" Width="96" Height="96" Stretch="Uniform" VerticalAlignment="Center" />
                     <StackPanel Grid.Column="1" Spacing="8" VerticalAlignment="Center">
                         <TextBlock Text="iLoveDastavez — Dastavez Studio" Style="{StaticResource TitleTextBlockStyle}" FontWeight="Bold" />
@@ -24,7 +31,95 @@
                         <TextBlock Text="{x:Bind ViewModel.Version}" Style="{StaticResource BodyStrongTextBlockStyle}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                         <TextBlock Text="{x:Bind ViewModel.Platform}" Style="{StaticResource CaptionTextBlockStyle}" Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
                     </StackPanel>
+
+                    <Button Grid.Column="2" VerticalAlignment="Center" Command="{x:Bind ViewModel.CheckForUpdatesCommand}">
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                            <ProgressRing IsActive="{x:Bind ViewModel.IsCheckingUpdates, Mode=OneWay}" Width="14" Height="14"
+                                          Visibility="{x:Bind ViewModel.IsCheckingUpdates, Mode=OneWay, Converter={StaticResource BoolToVis}}" />
+                            <FontIcon Glyph="&#xE72C;" Visibility="{x:Bind ViewModel.IsCheckingUpdates, Mode=OneWay, Converter={StaticResource InvBoolToVis}}" />
+                            <TextBlock Text="Check Updates" />
+                        </StackPanel>
+                    </Button>
                 </Grid>
+            </Border>
+
+            <!-- Update Status Notice if checked -->
+            <Border Background="{ThemeResource LayerFillColorDefaultBrush}" 
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" 
+                    BorderThickness="1" CornerRadius="8" Padding="14"
+                    Visibility="{x:Bind ViewModel.HasUpdateResult, Mode=OneWay, Converter={StaticResource BoolToVis}}">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <FontIcon Glyph="&#xE73E;" Foreground="{ThemeResource SystemFillColorSuccessBrush}" />
+                    <TextBlock Text="{x:Bind ViewModel.UpdateStatus, Mode=OneWay}" Style="{StaticResource BodyStrongTextBlockStyle}" />
+                </StackPanel>
+            </Border>
+
+            <!-- Developer & Open Source Community Links -->
+            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                    BorderThickness="1"
+                    CornerRadius="8"
+                    Padding="24">
+                <StackPanel Spacing="16">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <FontIcon Glyph="&#xE7BE;" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" FontSize="18" />
+                        <TextBlock Text="Developer &amp; Open Source Community" Style="{StaticResource SubtitleTextBlockStyle}" FontWeight="SemiBold" />
+                    </StackPanel>
+
+                    <TextBlock Text="iLoveDastavez is an open-source, privacy-first initiative created to empower millions of government job aspirants with fast, offline, compliant document preparation."
+                               Style="{StaticResource BodyTextBlockStyle}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+
+                    <!-- Links Grid -->
+                    <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto" RowSpacing="12" ColumnSpacing="14">
+                        <!-- Creator Profile -->
+                        <Button HorizontalAlignment="Stretch" Command="{x:Bind ViewModel.OpenCreatorGitHubCommand}" Padding="14,10">
+                            <Grid ColumnDefinitions="Auto,*,Auto" HorizontalAlignment="Stretch">
+                                <FontIcon Glyph="&#xE77B;" FontSize="18" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" Margin="0,0,10,0" />
+                                <StackPanel Grid.Column="1" HorizontalAlignment="Left">
+                                    <TextBlock Text="Created by Mohit Bhatt" Style="{StaticResource BodyStrongTextBlockStyle}" />
+                                    <TextBlock Text="github.com/mohitbhatt-du" Style="{StaticResource CaptionTextBlockStyle}" Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
+                                </StackPanel>
+                                <FontIcon Grid.Column="2" Glyph="&#xE8A7;" FontSize="12" Foreground="{ThemeResource TextFillColorTertiaryBrush}" VerticalAlignment="Center" />
+                            </Grid>
+                        </Button>
+
+                        <!-- GitHub Repository -->
+                        <Button Grid.Column="1" HorizontalAlignment="Stretch" Command="{x:Bind ViewModel.OpenRepositoryCommand}" Padding="14,10">
+                            <Grid ColumnDefinitions="Auto,*,Auto" HorizontalAlignment="Stretch">
+                                <FontIcon Glyph="&#xE8B7;" FontSize="18" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" Margin="0,0,10,0" />
+                                <StackPanel Grid.Column="1" HorizontalAlignment="Left">
+                                    <TextBlock Text="GitHub Repository" Style="{StaticResource BodyStrongTextBlockStyle}" />
+                                    <TextBlock Text="mohitbhatt-du/iLoveDastavez" Style="{StaticResource CaptionTextBlockStyle}" Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
+                                </StackPanel>
+                                <FontIcon Grid.Column="2" Glyph="&#xE8A7;" FontSize="12" Foreground="{ThemeResource TextFillColorTertiaryBrush}" VerticalAlignment="Center" />
+                            </Grid>
+                        </Button>
+
+                        <!-- Releases & Downloads -->
+                        <Button Grid.Row="1" HorizontalAlignment="Stretch" Command="{x:Bind ViewModel.OpenReleasesCommand}" Padding="14,10">
+                            <Grid ColumnDefinitions="Auto,*,Auto" HorizontalAlignment="Stretch">
+                                <FontIcon Glyph="&#xE896;" FontSize="18" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" Margin="0,0,10,0" />
+                                <StackPanel Grid.Column="1" HorizontalAlignment="Left">
+                                    <TextBlock Text="Releases &amp; Changelog" Style="{StaticResource BodyStrongTextBlockStyle}" />
+                                    <TextBlock Text="View releases and installer packages" Style="{StaticResource CaptionTextBlockStyle}" Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
+                                </StackPanel>
+                                <FontIcon Grid.Column="2" Glyph="&#xE8A7;" FontSize="12" Foreground="{ThemeResource TextFillColorTertiaryBrush}" VerticalAlignment="Center" />
+                            </Grid>
+                        </Button>
+
+                        <!-- Issues & Presets -->
+                        <Button Grid.Row="1" Grid.Column="1" HorizontalAlignment="Stretch" Command="{x:Bind ViewModel.OpenIssuesCommand}" Padding="14,10">
+                            <Grid ColumnDefinitions="Auto,*,Auto" HorizontalAlignment="Stretch">
+                                <FontIcon Glyph="&#xE939;" FontSize="18" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" Margin="0,0,10,0" />
+                                <StackPanel Grid.Column="1" HorizontalAlignment="Left">
+                                    <TextBlock Text="Report Issue / Request Exam" Style="{StaticResource BodyStrongTextBlockStyle}" />
+                                    <TextBlock Text="Submit new examination preset requests" Style="{StaticResource CaptionTextBlockStyle}" Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
+                                </StackPanel>
+                                <FontIcon Grid.Column="2" Glyph="&#xE8A7;" FontSize="12" Foreground="{ThemeResource TextFillColorTertiaryBrush}" VerticalAlignment="Center" />
+                            </Grid>
+                        </Button>
+                    </Grid>
+                </StackPanel>
             </Border>
 
             <!-- Zero Cloud & Privacy Guarantee -->
@@ -36,7 +131,7 @@
                 <StackPanel Spacing="12">
                     <StackPanel Orientation="Horizontal" Spacing="8">
                         <FontIcon Glyph="&#xE72E;" Foreground="{ThemeResource SystemFillColorSuccessBrush}" FontSize="18" />
-                        <TextBlock Text="Privacy &amp; Offline Architecture" Style="{StaticResource SubtitleTextBlockStyle}" FontWeight="SemiBold" />
+                        <TextBlock Text="Privacy &amp; Offline Security Architecture" Style="{StaticResource SubtitleTextBlockStyle}" FontWeight="SemiBold" />
                     </StackPanel>
                     <TextBlock Text="{x:Bind ViewModel.PrivacyPolicySummary}" Style="{StaticResource BodyTextBlockStyle}" TextWrapping="Wrap" />
                 </StackPanel>

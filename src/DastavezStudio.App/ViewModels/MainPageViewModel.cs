@@ -15,7 +15,7 @@ public partial class MainPageViewModel : ObservableObject
     public partial string Tagline { get; set; } = "हर दस्तावेज़, तैयार!";
 
     [ObservableProperty]
-    public partial string Version { get; set; } = "v1.0.2 (LTS)";
+    public partial string Version { get; set; } = "v1.0.3 (LTS)";
 
     [ObservableProperty]
     public partial string PrivacyBadge { get; set; } = "100% Offline • Zero Cloud • Local Processing Only";
