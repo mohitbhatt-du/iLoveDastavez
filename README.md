@@ -3,7 +3,7 @@
 <img src="assets/brand_banner.png" alt="iLoveDastavez — Dastavez Studio" width="600" />
 
 # Dastavez Studio (iLoveDastavez)
-### *हर दस्तावेज़, तैयार! — Complete 100% Offline Document & Image Toolkit for Windows*
+### *हर दस्तावेज़, तैयार! : Complete 100% Offline Document & Image Toolkit for Windows*
 
 [![Latest Release](https://img.shields.io/github/v/release/mohitbhatt-du/iLoveDastavez?color=orange&label=Release&logo=github)](https://github.com/mohitbhatt-du/iLoveDastavez/releases/latest)
 [![Platform: Windows 10/11 x64](https://img.shields.io/badge/Platform-Windows%2010%20%2F%2011%20(x64)-0078D6?logo=windows)](https://github.com/mohitbhatt-du/iLoveDastavez/releases/latest)
