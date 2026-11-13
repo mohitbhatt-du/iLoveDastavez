@@ -6,6 +6,9 @@ on:
       - 'v*'
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   package-and-release:
     name: Package Installer & Portable Bundle
@@ -19,6 +22,7 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '10.0.x'
+          dotnet-quality: 'preview'
 
       - name: Restore dependencies
         run: dotnet restore DastavezStudio.slnx
@@ -38,12 +42,17 @@ jobs:
         shell: pwsh
         run: |
           New-Item -ItemType Directory -Path artifacts/dist -Force
-          Compress-Archive -Path artifacts/publish/win-x64/* -DestinationPath artifacts/dist/DastavezStudio-Portable-win-x64.zip -Force
+          Compress-Archive -Path artifacts/publish/win-x64/* -DestinationPath artifacts/dist/DastavezStudio-v1.0.0-Portable-win-x64.zip -Force
 
-      - name: Setup Inno Setup
-        uses: Kevin-De-Koninck/InnoSetupAction@v1.0.4
-        with:
-          issPath: packaging/installer.iss
+      - name: Install Inno Setup
+        shell: pwsh
+        run: |
+          choco install innosetup --no-progress -y
+
+      - name: Build Inno Setup Installer
+        shell: pwsh
+        run: |
+          & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" packaging/installer.iss
 
       - name: Compute SHA-256 Checksums
         shell: pwsh
@@ -61,6 +70,6 @@ jobs:
         with:
           files: |
             artifacts/dist/DastavezStudio-Setup.exe
-            artifacts/dist/DastavezStudio-Portable-win-x64.zip
+            artifacts/dist/DastavezStudio-v1.0.0-Portable-win-x64.zip
             artifacts/dist/SHA256SUMS.txt
           generate_release_notes: true
