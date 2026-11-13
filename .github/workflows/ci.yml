@@ -28,4 +28,4 @@ jobs:
         run: dotnet test tests/DastavezStudio.UnitTests/DastavezStudio.UnitTests.csproj -c Release
 
       - name: Build WinUI 3 App (win-x64)
-        run: dotnet build src/DastavezStudio.App/DastavezStudio.App.csproj -c Release -r win-x64 --no-restore
+        run: dotnet build src/DastavezStudio.App/DastavezStudio.App.csproj -c Release -r win-x64
