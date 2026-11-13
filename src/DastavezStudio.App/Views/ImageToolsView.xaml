@@ -79,15 +79,25 @@
                 </Border>
             </Grid>
 
-            <!-- Actions Bar -->
+            <!-- File Status & Actions Bar -->
             <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                     BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                     BorderThickness="1"
                     CornerRadius="8"
                     Padding="16">
-                <StackPanel Orientation="Horizontal" Spacing="12">
-                    <Button Content="Select Source Image" Style="{StaticResource AccentButtonStyle}" />
-                    <Button Content="Process &amp; Export" />
+                <StackPanel Spacing="12">
+                    <TextBlock Text="{x:Bind ViewModel.StatusMessage, Mode=OneWay}" 
+                               Style="{StaticResource BodyStrongTextBlockStyle}" />
+
+                    <StackPanel Orientation="Horizontal" Spacing="12">
+                        <Button Content="Select Source Image..." 
+                                Click="OnSelectFileClicked" 
+                                Style="{StaticResource AccentButtonStyle}" />
+                        <Button Content="Process Image" 
+                                Command="{x:Bind ViewModel.ProcessImageCommand}" />
+                        <Button Content="Export &amp; Save" 
+                                Click="OnExportClicked" />
+                    </StackPanel>
                 </StackPanel>
             </Border>
 

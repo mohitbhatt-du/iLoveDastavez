@@ -129,4 +129,19 @@ public class ImageProcessorTests
             if (File.Exists(tempOutput)) File.Delete(tempOutput);
         }
     }
+
+    [Fact]
+    public void GenerateDefaultLogos_GeneratesExpectedPngFiles()
+    {
+        var targetDir = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "..", "src", "DastavezStudio.App", "Assets", "Logos"));
+        LogoGenerator.GenerateDefaultLogos(targetDir);
+
+        Assert.True(File.Exists(Path.Combine(targetDir, "ibps.png")));
+        Assert.True(File.Exists(Path.Combine(targetDir, "sbi.png")));
+        Assert.True(File.Exists(Path.Combine(targetDir, "ssc.png")));
+        Assert.True(File.Exists(Path.Combine(targetDir, "upsc.png")));
+        Assert.True(File.Exists(Path.Combine(targetDir, "rrb.png")));
+        Assert.True(File.Exists(Path.Combine(targetDir, "nta.png")));
+        Assert.True(File.Exists(Path.Combine(targetDir, "psc.png")));
+    }
 }

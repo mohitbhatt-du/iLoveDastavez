@@ -104,28 +104,34 @@
                             <TextBlock Text="{x:Bind ViewModel.Tagline}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" />
                         </StackPanel>
 
-                        <!-- Supported Exam Authority Badges -->
-                        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6" HorizontalAlignment="Center" VerticalAlignment="Center">
-                            <TextBlock Text="Presets:" Style="{StaticResource CaptionTextBlockStyle}" Foreground="{ThemeResource TextFillColorTertiaryBrush}" Margin="0,0,4,0" VerticalAlignment="Center" />
-                            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" CornerRadius="4" Padding="6,2" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1">
-                                <TextBlock Text="IBPS" FontSize="11" FontWeight="SemiBold" ToolTipService.ToolTip="Institute of Banking Personnel Selection" />
-                            </Border>
-                            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" CornerRadius="4" Padding="6,2" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1">
-                                <TextBlock Text="SBI" FontSize="11" FontWeight="SemiBold" ToolTipService.ToolTip="State Bank of India Recruitment" />
-                            </Border>
-                            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" CornerRadius="4" Padding="6,2" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1">
-                                <TextBlock Text="SSC" FontSize="11" FontWeight="SemiBold" ToolTipService.ToolTip="Staff Selection Commission" />
-                            </Border>
-                            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" CornerRadius="4" Padding="6,2" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1">
-                                <TextBlock Text="UPSC" FontSize="11" FontWeight="SemiBold" ToolTipService.ToolTip="Union Public Service Commission" />
-                            </Border>
-                            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" CornerRadius="4" Padding="6,2" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1">
-                                <TextBlock Text="RRB" FontSize="11" FontWeight="SemiBold" ToolTipService.ToolTip="Railway Recruitment Board" />
-                            </Border>
-                            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" CornerRadius="4" Padding="6,2" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1">
-                                <TextBlock Text="NTA" FontSize="11" FontWeight="SemiBold" ToolTipService.ToolTip="National Testing Agency (JEE / NEET / NET)" />
-                            </Border>
-                        </StackPanel>
+                        <!-- Supported Exam Authority Logos with Hover & Tooltips -->
+                        <ScrollViewer Grid.Column="1" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled" HorizontalAlignment="Center">
+                            <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                                <TextBlock Text="Exam Presets:" Style="{StaticResource CaptionTextBlockStyle}" Foreground="{ThemeResource TextFillColorTertiaryBrush}" Margin="0,0,4,0" VerticalAlignment="Center" />
+                                
+                                <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" CornerRadius="4" Padding="3,2" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1">
+                                    <Image Source="Assets/Logos/ibps.png" Height="20" Stretch="Uniform" ToolTipService.ToolTip="Institute of Banking Personnel Selection (IBPS)" />
+                                </Border>
+                                <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" CornerRadius="4" Padding="3,2" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1">
+                                    <Image Source="Assets/Logos/sbi.png" Height="20" Stretch="Uniform" ToolTipService.ToolTip="State Bank of India (SBI)" />
+                                </Border>
+                                <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" CornerRadius="4" Padding="3,2" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1">
+                                    <Image Source="Assets/Logos/ssc.png" Height="20" Stretch="Uniform" ToolTipService.ToolTip="Staff Selection Commission (SSC)" />
+                                </Border>
+                                <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" CornerRadius="4" Padding="3,2" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1">
+                                    <Image Source="Assets/Logos/upsc.png" Height="20" Stretch="Uniform" ToolTipService.ToolTip="Union Public Service Commission (UPSC)" />
+                                </Border>
+                                <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" CornerRadius="4" Padding="3,2" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1">
+                                    <Image Source="Assets/Logos/rrb.png" Height="20" Stretch="Uniform" ToolTipService.ToolTip="Railway Recruitment Board (RRB)" />
+                                </Border>
+                                <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" CornerRadius="4" Padding="3,2" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1">
+                                    <Image Source="Assets/Logos/nta.png" Height="20" Stretch="Uniform" ToolTipService.ToolTip="National Testing Agency (NTA)" />
+                                </Border>
+                                <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" CornerRadius="4" Padding="3,2" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1">
+                                    <Image Source="Assets/Logos/psc.png" Height="20" Stretch="Uniform" ToolTipService.ToolTip="State Public Service Commissions (PSC)" />
+                                </Border>
+                            </StackPanel>
+                        </ScrollViewer>
 
                         <!-- Offline Security Status & Version -->
                         <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
