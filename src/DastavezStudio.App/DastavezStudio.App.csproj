@@ -43,6 +43,8 @@
     <ProjectReference Include="..\DastavezStudio.ImageEngine\DastavezStudio.ImageEngine.csproj" />
     <ProjectReference Include="..\DastavezStudio.PdfEngine\DastavezStudio.PdfEngine.csproj" />
     <ProjectReference Include="..\DastavezStudio.Security\DastavezStudio.Security.csproj" />
+    <ProjectReference Include="..\DastavezStudio.AiEngine\DastavezStudio.AiEngine.csproj" />
+    <ProjectReference Include="..\DastavezStudio.OcrEngine\DastavezStudio.OcrEngine.csproj" />
   </ItemGroup>
 
 

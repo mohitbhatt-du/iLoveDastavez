@@ -5,38 +5,130 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="using:DastavezStudio.App.Views"
+    xmlns:vm="using:DastavezStudio.App.ViewModels"
+    xmlns:conv="using:DastavezStudio.App.Converters"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
+
+    <Page.Resources>
+        <conv:BoolToVisibilityConverter x:Key="BoolToVis" />
+        <conv:InverseBoolToVisibilityConverter x:Key="InvBoolToVis" />
+        <conv:InverseBoolConverter x:Key="InvBool" />
+    </Page.Resources>
 
     <ScrollViewer VerticalScrollBarVisibility="Auto">
         <StackPanel Spacing="20" Padding="32,24,32,32" MaxWidth="1100" HorizontalAlignment="Left">
             
+            <!-- Page Header -->
             <StackPanel Spacing="4">
                 <TextBlock Text="Document Scanner &amp; Offline OCR" Style="{StaticResource TitleTextBlockStyle}" FontWeight="Bold" />
-                <TextBlock Text="Perspective correction, border auto-crop, shadow removal, and offline text extraction into searchable PDF." 
+                <TextBlock Text="Straighten tilted scans, remove mobile phone shadows, normalize certificates, and extract text into searchable PDFs offline." 
                            Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
             </StackPanel>
 
-            <!-- Enhancement Options -->
+            <!-- Offline Guarantee InfoBar -->
+            <InfoBar IsOpen="True" IsClosable="False" Severity="Informational"
+                     Title="100% Offline Guarantee"
+                     Message="All image preprocessing, deskewing, and OCR algorithms run locally on device. No accounts, telemetry, or remote servers." />
+
+            <!-- Cleaning & OCR Configuration Card -->
             <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                     BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                     BorderThickness="1"
                     CornerRadius="8"
                     Padding="20">
                 <StackPanel Spacing="16">
-                    <TextBlock Text="Scanned Document Cleaning" Style="{StaticResource SubtitleTextBlockStyle}" FontWeight="SemiBold" />
-                    
-                    <StackPanel Orientation="Horizontal" Spacing="24">
-                        <CheckBox Content="Auto-Deskew &amp; Perspective Correction" IsChecked="{x:Bind ViewModel.AutoDeskew, Mode=TwoWay}" />
-                        <CheckBox Content="Shadow &amp; Crease Removal" IsChecked="{x:Bind ViewModel.ShadowRemoval, Mode=TwoWay}" />
-                        <CheckBox Content="Black &amp; White Clean Contrast" IsChecked="{x:Bind ViewModel.DocumentCleanup, Mode=TwoWay}" />
+                    <TextBlock Text="Document Processing &amp; OCR Configuration" Style="{StaticResource SubtitleTextBlockStyle}" FontWeight="SemiBold" />
+
+                    <Grid ColumnDefinitions="*,*,*,*" ColumnSpacing="20">
+                        <StackPanel Spacing="8">
+                            <CheckBox Content="Auto-Deskew &amp; Straighten" IsChecked="{x:Bind ViewModel.AutoDeskew, Mode=TwoWay}" />
+                            <CheckBox Content="Shadow &amp; Crease Removal" IsChecked="{x:Bind ViewModel.ShadowRemoval, Mode=TwoWay}" />
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="1" Spacing="8">
+                            <CheckBox Content="Black &amp; White Binarization" IsChecked="{x:Bind ViewModel.DocumentCleanup, Mode=TwoWay}" />
+                            <CheckBox Content="Enhance Contrast" IsChecked="{x:Bind ViewModel.EnhanceContrast, Mode=TwoWay}" />
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="2" Spacing="6">
+                            <TextBlock Text="Binarization Threshold" Style="{StaticResource CaptionTextBlockStyle}" />
+                            <Slider Value="{x:Bind ViewModel.Threshold, Mode=TwoWay}" Minimum="60" Maximum="200" StepFrequency="5" />
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="3" Spacing="6">
+                            <TextBlock Text="OCR Recognition Language" Style="{StaticResource CaptionTextBlockStyle}" />
+                            <ComboBox ItemsSource="{x:Bind ViewModel.AvailableLanguages}"
+                                      SelectedItem="{x:Bind ViewModel.SelectedLanguage, Mode=TwoWay}"
+                                      HorizontalAlignment="Stretch" />
+                        </StackPanel>
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <!-- Document Selection & Action Card -->
+            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                    BorderThickness="1"
+                    CornerRadius="8"
+                    Padding="20">
+                <StackPanel Spacing="16">
+                    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="16" VerticalAlignment="Center">
+                        <FontIcon Glyph="&#xE8E5;" FontSize="28" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+
+                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                            <TextBlock Text="{x:Bind ViewModel.InputFileName, Mode=OneWay, FallbackValue='No document selected'}" 
+                                       Style="{StaticResource SubtitleTextBlockStyle}" FontWeight="SemiBold" />
+                            <TextBlock Text="{x:Bind ViewModel.InputFilePath, Mode=OneWay, FallbackValue='Select a certificate, mark sheet, ID card or document image'}" 
+                                       Style="{StaticResource CaptionTextBlockStyle}" Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
+                        </StackPanel>
+
+                        <Button Grid.Column="2" Click="OnSelectFileClicked" Style="{StaticResource AccentButtonStyle}"
+                                IsEnabled="{x:Bind ViewModel.IsProcessing, Mode=OneWay, Converter={StaticResource InvBool}}">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <FontIcon Glyph="&#xE8E5;" FontSize="16" />
+                                <TextBlock Text="Select Document..." />
+                            </StackPanel>
+                        </Button>
+                    </Grid>
+
+                    <!-- Progress Bar -->
+                    <StackPanel Spacing="6" Visibility="{x:Bind ViewModel.IsProcessing, Mode=OneWay, Converter={StaticResource BoolToVis}}">
+                        <ProgressBar Value="{x:Bind ViewModel.Progress, Mode=OneWay}" Maximum="100" />
                     </StackPanel>
 
+                    <!-- Status Text -->
+                    <TextBlock Text="{x:Bind ViewModel.StatusMessage, Mode=OneWay}" Style="{StaticResource BodyStrongTextBlockStyle}" />
+
+                    <!-- Result Details InfoBar -->
+                    <InfoBar IsOpen="{x:Bind ViewModel.HasCleanedFile, Mode=OneWay}"
+                             IsClosable="False"
+                             Severity="Success"
+                             Title="Document Processed"
+                             Message="{x:Bind ViewModel.ResultDetails, Mode=OneWay}">
+                        <InfoBar.ActionButton>
+                            <Button Content="Save Clean Document..." Click="OnExportCleanedClicked" />
+                        </InfoBar.ActionButton>
+                    </InfoBar>
+
+                    <!-- Primary Actions -->
                     <StackPanel Orientation="Horizontal" Spacing="12">
-                        <Button Content="Select Scanned Image..." Style="{StaticResource AccentButtonStyle}" />
-                        <Button Content="Clean Document" />
-                        <Button Content="Extract Text (OCR)" />
-                        <Button Content="Export Searchable PDF" />
+                        <Button Content="Clean Document (Deskew &amp; Shadows)"
+                                Command="{x:Bind ViewModel.CleanDocumentCommand}"
+                                Style="{StaticResource AccentButtonStyle}"
+                                IsEnabled="{x:Bind ViewModel.HasInputFile, Mode=OneWay}" />
+
+                        <Button Content="Extract Text (OCR)"
+                                Command="{x:Bind ViewModel.ExtractTextCommand}"
+                                IsEnabled="{x:Bind ViewModel.HasInputFile, Mode=OneWay}" />
+
+                        <Button Content="Create Searchable PDF"
+                                Command="{x:Bind ViewModel.CreateSearchablePdfCommand}"
+                                IsEnabled="{x:Bind ViewModel.HasInputFile, Mode=OneWay}" />
+
+                        <Button Content="Save Searchable PDF..."
+                                Click="OnExportPdfClicked"
+                                IsEnabled="{x:Bind ViewModel.HasSearchablePdf, Mode=OneWay}" />
                     </StackPanel>
                 </StackPanel>
             </Border>
@@ -47,13 +139,32 @@
                     BorderThickness="1"
                     CornerRadius="8"
                     Padding="20">
-                <StackPanel Spacing="10">
-                    <TextBlock Text="Extracted Text Output" Style="{StaticResource SubtitleTextBlockStyle}" FontWeight="SemiBold" />
+                <StackPanel Spacing="14">
+                    <Grid ColumnDefinitions="*,Auto,Auto" VerticalAlignment="Center">
+                        <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
+                            <TextBlock Text="Extracted Text Output" Style="{StaticResource SubtitleTextBlockStyle}" FontWeight="SemiBold" />
+                            <Border Background="{ThemeResource LayerFillColorDefaultBrush}" CornerRadius="4" Padding="8,2" VerticalAlignment="Center">
+                                <TextBlock Style="{StaticResource CaptionTextBlockStyle}">
+                                    <Run Text="{x:Bind ViewModel.WordCount, Mode=OneWay}" />
+                                    <Run Text=" words (" />
+                                    <Run Text="{x:Bind ViewModel.LineCount, Mode=OneWay}" />
+                                    <Run Text=" lines)" />
+                                </TextBlock>
+                            </Border>
+                        </StackPanel>
+
+                        <Button Grid.Column="1" Content="Copy Text" Command="{x:Bind ViewModel.CopyExtractedTextCommand}" 
+                                IsEnabled="{x:Bind ViewModel.HasExtractedText, Mode=OneWay}" Margin="0,0,12,0" />
+
+                        <Button Grid.Column="2" Content="Export .TXT" Click="OnExportTxtClicked" 
+                                IsEnabled="{x:Bind ViewModel.HasExtractedText, Mode=OneWay}" />
+                    </Grid>
+
                     <TextBox Text="{x:Bind ViewModel.ExtractedText, Mode=TwoWay}" 
                              AcceptsReturn="True" 
-                             Height="180" 
+                             Height="200" 
                              TextWrapping="Wrap" 
-                             PlaceholderText="OCR extracted text will appear here. No data is sent across any network." />
+                             PlaceholderText="OCR extracted text will appear here. No document content is sent across any network." />
                 </StackPanel>
             </Border>
 

@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net10.0</TargetFramework>
+    <TargetFramework>net10.0-windows10.0.19041.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <IsPackable>false</IsPackable>
@@ -23,6 +23,8 @@
     <ProjectReference Include="..\..\src\DastavezStudio.ExamPresets\DastavezStudio.ExamPresets.csproj" />
     <ProjectReference Include="..\..\src\DastavezStudio.ImageEngine\DastavezStudio.ImageEngine.csproj" />
     <ProjectReference Include="..\..\src\DastavezStudio.PdfEngine\DastavezStudio.PdfEngine.csproj" />
+    <ProjectReference Include="..\..\src\DastavezStudio.AiEngine\DastavezStudio.AiEngine.csproj" />
+    <ProjectReference Include="..\..\src\DastavezStudio.OcrEngine\DastavezStudio.OcrEngine.csproj" />
   </ItemGroup>
 
 </Project>

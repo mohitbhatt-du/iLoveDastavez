@@ -7,6 +7,8 @@ using DastavezStudio.ExamPresets;
 using DastavezStudio.ImageEngine;
 using DastavezStudio.PdfEngine;
 using DastavezStudio.Security;
+using DastavezStudio.AiEngine;
+using DastavezStudio.OcrEngine;
 
 namespace DastavezStudio.App;
 
@@ -36,6 +38,9 @@ public partial class App : Application
         services.AddSingleton<IImageProcessor, ImageProcessor>();
         services.AddSingleton<IPdfProcessor, PdfProcessor>();
         services.AddSingleton<IBatchProcessor, BatchProcessor>();
+        services.AddSingleton<IAiEnhancer, AiEnhancer>();
+        services.AddSingleton<IDocumentCleaner, DocumentCleaner>();
+        services.AddSingleton<IOcrEngine, WindowsOcrEngine>();
 
         // ViewModels
         services.AddTransient<MainPageViewModel>();
