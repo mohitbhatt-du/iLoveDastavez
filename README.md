@@ -19,6 +19,7 @@
   No cloud uploads. No account required. No data leakage. 100% private, air-gapped, and runs locally on your PC.
 </p>
 
+[**🌐 Official Website**](https://mohitbhatt-du.github.io/iLoveDastavez/) •
 [**⬇️ Download Windows Installer (v1.0.3)**](https://github.com/mohitbhatt-du/iLoveDastavez/releases/download/v1.0.3/DastavezStudio-Setup.exe) •
 [**📦 Download Portable ZIP (v1.0.3)**](https://github.com/mohitbhatt-du/iLoveDastavez/releases/download/v1.0.3/DastavezStudio-v1.0.3-Portable-win-x64.zip) •
 [**🚀 All Releases**](https://github.com/mohitbhatt-du/iLoveDastavez/releases) •
