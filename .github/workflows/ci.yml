@@ -24,8 +24,8 @@ jobs:
       - name: Restore dependencies
         run: dotnet restore DastavezStudio.slnx
 
-      - name: Build solution (Release)
-        run: dotnet build DastavezStudio.slnx -c Release --no-restore
-
       - name: Run unit test suite
-        run: dotnet test tests/DastavezStudio.UnitTests/DastavezStudio.UnitTests.csproj -c Release --no-build --verbosity normal
+        run: dotnet test tests/DastavezStudio.UnitTests/DastavezStudio.UnitTests.csproj -c Release
+
+      - name: Build WinUI 3 App (win-x64)
+        run: dotnet build src/DastavezStudio.App/DastavezStudio.App.csproj -c Release -r win-x64 --no-restore
